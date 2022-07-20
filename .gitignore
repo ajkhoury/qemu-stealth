@@ -1,5 +1,6 @@
 /GNUmakefile
 /build/
+/build-mingw64/
 /.cache/
 /.vscode/
 *.pyc

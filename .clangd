@@ -1,0 +1,10 @@
+CompileFlags:
+  Add: [--include=include/qemu/compiler.h,
+        --include=include/qemu/typedefs.h,
+        --include=include/qemu/osdep.h,
+        --include=glib.h,
+        --include=stdint.h,
+        --include=stdbool.h,
+        -Wno-unknown-warning-option,
+        -DTARGET_X86_64]
+  Remove: [-m*, -f*]
