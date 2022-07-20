@@ -1,0 +1,47 @@
+{
+    "[c]": {
+        "editor.detectIndentation": true,
+        "editor.tabSize": 8,
+        "editor.insertSpaces": false,
+        "editor.rulers": [80,100]
+    },
+
+    "files.associations": {
+        "*.cpp": "cpp",
+        "*.hpp": "cpp",
+        "*.c": "c",
+        "*.h": "c",
+        "*.inc": "c",
+        "*.code": "plaintext"
+    },
+
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}/build",
+        "--malloc-trim",
+        "--background-index",
+        "--completion-style=detailed",
+        "--header-insertion=never",
+        "--log=error"
+    ],
+    "editor.foldingStrategy": "auto",
+    "explicitFolding.rules": {
+        "c": [
+            {
+                "beginRegex": "#if(?:n?def)?",
+                "middleRegex": "#el(?:se|if)",
+                "endRegex": "#endif"
+            }
+        ],
+        "cpp": [
+            {
+                "beginRegex": "#if(?:n?def)?",
+                "middleRegex": "#el(?:se|if)",
+                "endRegex": "#endif"
+            }
+        ]
+    },
+
+    "git.detectSubmodules": true,
+    "git.detectSubmodulesLimit": 25
+}
