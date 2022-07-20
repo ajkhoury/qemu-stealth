@@ -1629,6 +1629,7 @@ build_dmar_q35(GArray *table_data, BIOSLinker *linker, const char *oem_id,
     acpi_table_end(linker, &table);
 }
 
+#if 0
 /*
  * Windows ACPI Emulated Devices Table
  * (Version 1.0 - April 6, 2009)
@@ -1655,6 +1656,7 @@ build_waet(GArray *table_data, BIOSLinker *linker, const char *oem_id,
     build_append_int_noprefix(table_data, 1 << 1 /* ACPI PM timer good */, 4);
     acpi_table_end(linker, &table);
 }
+#endif
 
 /*
  *   IVRS table as specified in AMD IOMMU Specification v2.62, Section 5.2
@@ -2095,8 +2097,10 @@ void acpi_build(AcpiBuildTables *tables, MachineState *machine)
     }
 
     acpi_add_table(table_offsets, tables_blob);
+#if 0
     build_waet(tables_blob, tables->linker, x86ms->oem_id,
                x86ms->oem_table_id, x86ms->creator_id);
+#endif
 
     /* Add tables supplied by user (if any) */
     for (u = acpi_table_first(); u; u = acpi_table_next(u)) {
