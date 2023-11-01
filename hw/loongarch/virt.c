@@ -849,6 +849,7 @@ static void virt_initfn(Object *obj)
     lvms->acpi = ON_OFF_AUTO_AUTO;
     lvms->oem_id = g_strndup(ACPI_BUILD_APPNAME6, 6);
     lvms->oem_table_id = g_strndup(ACPI_BUILD_APPNAME8, 8);
+    lvms->creator_id = g_strndup(ACPI_BUILD_APPNAME8, 4);
     virt_flash_create(lvms);
 }
 

@@ -86,12 +86,13 @@ static gint pci_host_range_compare(gconstpointer a, gconstpointer b)
  */
 void build_viot(MachineState *ms, GArray *table_data, BIOSLinker *linker,
                 uint16_t virtio_iommu_bdf, const char *oem_id,
-                const char *oem_table_id)
+                const char *oem_table_id, const char *creator_id)
 {
     /* The virtio-iommu node follows the 48-bytes header */
     int viommu_off = 48;
     AcpiTable table = { .sig = "VIOT", .rev = 0,
-                        .oem_id = oem_id, .oem_table_id = oem_table_id };
+                        .oem_id = oem_id, .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
     GArray *pci_host_ranges =  g_array_new(false, true,
                                            sizeof(struct viot_pci_host_range));
     struct viot_pci_host_range *pci_host_range;

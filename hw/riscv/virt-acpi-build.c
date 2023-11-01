@@ -263,7 +263,7 @@ spcr_setup(GArray *table_data, BIOSLinker *linker, RISCVVirtState *s)
     };
 
     build_spcr(table_data, linker, &serial, 4, s->oem_id, s->oem_table_id,
-               name);
+               s->creator_id, name);
 }
 
 /* RHCT Node[N] starts at offset 56 */
@@ -288,7 +288,8 @@ static void build_rhct(GArray *table_data,
     g_autofree char *isa = NULL;
 
     AcpiTable table = { .sig = "RHCT", .rev = 1, .oem_id = s->oem_id,
-                        .oem_table_id = s->oem_table_id };
+                        .oem_table_id = s->oem_table_id,
+                        .creator_id = s->creator_id };
 
     acpi_table_begin(&table, table_data);
 
@@ -434,7 +435,8 @@ static void build_fadt_rev6(GArray *table_data,
         .xdsdt_tbl_offset = &dsdt_tbl_offset,
     };
 
-    build_fadt(table_data, linker, &fadt, s->oem_id, s->oem_table_id);
+    build_fadt(table_data, linker, &fadt, s->oem_id, s->oem_table_id,
+               s->creator_id);
 }
 
 /* DSDT */
@@ -447,7 +449,8 @@ static void build_dsdt(GArray *table_data,
     uint8_t socket_count;
     const MemMapEntry *memmap = s->memmap;
     AcpiTable table = { .sig = "DSDT", .rev = 2, .oem_id = s->oem_id,
-                        .oem_table_id = s->oem_table_id };
+                        .oem_table_id = s->oem_table_id,
+                        .creator_id = s->creator_id };
 
 
     acpi_table_begin(&table, table_data);
@@ -535,7 +538,8 @@ static void build_madt(GArray *table_data,
     hart_index_bits = imsic_num_bits(imsic_max_hart_per_socket);
 
     AcpiTable table = { .sig = "APIC", .rev = 7, .oem_id = s->oem_id,
-                        .oem_table_id = s->oem_table_id };
+                        .oem_table_id = s->oem_table_id,
+                        .creator_id = s->creator_id };
 
     acpi_table_begin(&table, table_data);
     /* Local Interrupt Controller Address */
@@ -917,7 +921,7 @@ static void virt_acpi_build(RISCVVirtState *s, AcpiBuildTables *tables)
     /* XSDT is pointed to by RSDP */
     xsdt = tables_blob->len;
     build_xsdt(tables_blob, tables->linker, table_offsets, s->oem_id,
-                s->oem_table_id);
+                s->oem_table_id, s->creator_id);
 
     /* RSDP is in FSEG memory, so allocate it separately */
     {

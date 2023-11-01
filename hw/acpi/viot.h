@@ -8,6 +8,6 @@
 
 void build_viot(MachineState *ms, GArray *table_data, BIOSLinker *linker,
                 uint16_t virtio_iommu_bdf, const char *oem_id,
-                const char *oem_table_id);
+                const char *oem_table_id, const char *creator_id);
 
 #endif /* VIOT_H */

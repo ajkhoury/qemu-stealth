@@ -333,10 +333,12 @@ static void build_ghes_v2(GArray *table_data,
 /* Build Hardware Error Source Table */
 void acpi_build_hest(GArray *table_data, GArray *hardware_errors,
                      BIOSLinker *linker,
-                     const char *oem_id, const char *oem_table_id)
+                     const char *oem_id, const char *oem_table_id,
+                     const char *creator_id)
 {
     AcpiTable table = { .sig = "HEST", .rev = 1,
-                        .oem_id = oem_id, .oem_table_id = oem_table_id };
+                        .oem_id = oem_id, .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     build_ghes_error_table(hardware_errors, linker);
 

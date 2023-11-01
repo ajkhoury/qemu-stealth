@@ -23,7 +23,8 @@
 
 void cxl_build_cedt(GArray *table_offsets, GArray *table_data,
                     BIOSLinker *linker, const char *oem_id,
-                    const char *oem_table_id, CXLState *cxl_state);
+                    const char *oem_table_id, const char *creator_id,
+                    CXLState *cxl_state);
 void build_cxl_osc_method(Aml *dev);
 void build_cxl_dsm_method(Aml *dev);
 

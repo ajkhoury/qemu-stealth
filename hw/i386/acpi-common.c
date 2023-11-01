@@ -94,7 +94,8 @@ build_xrupt_override(GArray *entry, uint8_t src, uint32_t gsi, uint16_t flags)
  */
 void acpi_build_madt(GArray *table_data, BIOSLinker *linker,
                      X86MachineState *x86ms,
-                     const char *oem_id, const char *oem_table_id)
+                     const char *oem_id, const char *oem_table_id,
+                     const char *creator_id)
 {
     int i;
     bool x2apic_mode = false;
@@ -102,7 +103,8 @@ void acpi_build_madt(GArray *table_data, BIOSLinker *linker,
     X86MachineClass *x86mc = X86_MACHINE_GET_CLASS(x86ms);
     const CPUArchIdList *apic_ids = mc->possible_cpu_arch_ids(MACHINE(x86ms));
     AcpiTable table = { .sig = "APIC", .rev = 3, .oem_id = oem_id,
-                        .oem_table_id = oem_table_id };
+                        .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_table_begin(&table, table_data);
     /* Local APIC Address */

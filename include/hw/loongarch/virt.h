@@ -52,6 +52,7 @@ struct LoongArchVirtMachineState {
     OnOffAuto    veiointc;
     char         *oem_id;
     char         *oem_table_id;
+    char         *creator_id;
     DeviceState  *acpi_ged;
     int          fdt_size;
     DeviceState *platform_bus_dev;

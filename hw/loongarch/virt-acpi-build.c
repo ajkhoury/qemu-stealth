@@ -130,7 +130,8 @@ build_madt(GArray *table_data, BIOSLinker *linker,
     const CPUArchIdList *arch_ids = mc->possible_cpu_arch_ids(ms);
     int i, arch_id, flags;
     AcpiTable table = { .sig = "APIC", .rev = 1, .oem_id = lvms->oem_id,
-                        .oem_table_id = lvms->oem_table_id };
+                        .oem_table_id = lvms->oem_table_id,
+                        .creator_id = lvms->creator_id  };
 
     acpi_table_begin(&table, table_data);
 
@@ -190,7 +191,8 @@ build_srat(GArray *table_data, BIOSLinker *linker, MachineState *machine)
     MachineClass *mc = MACHINE_GET_CLASS(lvms);
     const CPUArchIdList *arch_ids = mc->possible_cpu_arch_ids(machine);
     AcpiTable table = { .sig = "SRAT", .rev = 1, .oem_id = lvms->oem_id,
-                        .oem_table_id = lvms->oem_table_id };
+                        .oem_table_id = lvms->oem_table_id,
+                        .creator_id = lvms->creator_id };
 
     acpi_table_begin(&table, table_data);
     build_append_int_noprefix(table_data, 1, 4); /* Reserved */
@@ -297,7 +299,7 @@ spcr_setup(GArray *table_data, BIOSLinker *linker, MachineState *machine)
      * NameSpaceString.
      */
     build_spcr(table_data, linker, &serial, 2, lvms->oem_id,
-               lvms->oem_table_id, NULL);
+               lvms->oem_table_id, lvms->creator_id, NULL);
 }
 
 typedef
@@ -481,7 +483,8 @@ build_dsdt(GArray *table_data, BIOSLinker *linker, MachineState *machine)
     Aml *dsdt, *scope, *pkg;
     LoongArchVirtMachineState *lvms = LOONGARCH_VIRT_MACHINE(machine);
     AcpiTable table = { .sig = "DSDT", .rev = 1, .oem_id = lvms->oem_id,
-                        .oem_table_id = lvms->oem_table_id };
+                        .oem_table_id = lvms->oem_table_id,
+                        .creator_id = lvms->creator_id };
 
     acpi_table_begin(&table, table_data);
     dsdt = init_aml_allocator();
@@ -545,14 +548,14 @@ static void acpi_build(AcpiBuildTables *tables, MachineState *machine)
     fadt_data.dsdt_tbl_offset = &dsdt;
     fadt_data.xdsdt_tbl_offset = &dsdt;
     build_fadt(tables_blob, tables->linker, &fadt_data,
-               lvms->oem_id, lvms->oem_table_id);
+               lvms->oem_id, lvms->oem_table_id, lvms->creator_id);
 
     acpi_add_table(table_offsets, tables_blob);
     build_madt(tables_blob, tables->linker, lvms);
 
     acpi_add_table(table_offsets, tables_blob);
     build_pptt(tables_blob, tables->linker, machine,
-               lvms->oem_id, lvms->oem_table_id);
+               lvms->oem_id, lvms->oem_table_id, lvms->creator_id);
 
     acpi_add_table(table_offsets, tables_blob);
     build_srat(tables_blob, tables->linker, machine);
@@ -565,12 +568,12 @@ static void acpi_build(AcpiBuildTables *tables, MachineState *machine)
         if (machine->numa_state->have_numa_distance) {
             acpi_add_table(table_offsets, tables_blob);
             build_slit(tables_blob, tables->linker, machine, lvms->oem_id,
-                       lvms->oem_table_id);
+                       lvms->oem_table_id, lvms->creator_id);
         }
         if (machine->numa_state->hmat_enabled) {
             acpi_add_table(table_offsets, tables_blob);
             build_hmat(tables_blob, tables->linker, machine->numa_state,
-                       lvms->oem_id, lvms->oem_table_id);
+                       lvms->oem_id, lvms->oem_table_id, lvms->creator_id);
         }
     }
 
@@ -581,7 +584,7 @@ static void acpi_build(AcpiBuildTables *tables, MachineState *machine)
            .size = VIRT_PCI_CFG_SIZE,
         };
         build_mcfg(tables_blob, tables->linker, &mcfg, lvms->oem_id,
-                   lvms->oem_table_id);
+                   lvms->oem_table_id, lvms->creator_id);
     }
 
 #ifdef CONFIG_TPM
@@ -590,7 +593,7 @@ static void acpi_build(AcpiBuildTables *tables, MachineState *machine)
         acpi_add_table(table_offsets, tables_blob);
         build_tpm2(tables_blob, tables->linker,
                    tables->tcpalog, lvms->oem_id,
-                   lvms->oem_table_id);
+                   lvms->oem_table_id, lvms->creator_id);
     }
 #endif
     /* Add tables supplied by user (if any) */
@@ -604,7 +607,7 @@ static void acpi_build(AcpiBuildTables *tables, MachineState *machine)
     /* RSDT is pointed to by RSDP */
     xsdt = tables_blob->len;
     build_xsdt(tables_blob, tables->linker, table_offsets,
-               lvms->oem_id, lvms->oem_table_id);
+               lvms->oem_id, lvms->oem_table_id, lvms->creator_id);
 
     /* RSDP is in FSEG memory, so allocate it separately */
     {

@@ -419,6 +419,7 @@ typedef struct AcpiTable {
     const uint8_t rev;
     const char *oem_id;
     const char *oem_table_id;
+    const char *creator_id;
     /* private vars tracking table state */
     GArray *array;
     unsigned table_offset;
@@ -453,10 +454,12 @@ void
 build_rsdp(GArray *tbl, BIOSLinker *linker, AcpiRsdpData *rsdp_data);
 void
 build_rsdt(GArray *table_data, BIOSLinker *linker, GArray *table_offsets,
-           const char *oem_id, const char *oem_table_id);
+           const char *oem_id, const char *oem_table_id,
+           const char *creator_id);
 void
 build_xsdt(GArray *table_data, BIOSLinker *linker, GArray *table_offsets,
-           const char *oem_id, const char *oem_table_id);
+           const char *oem_id, const char *oem_table_id,
+           const char *creator_id);
 
 int
 build_append_named_dword(GArray *array, const char *name_format, ...)
@@ -494,18 +497,23 @@ void build_srat_acpi_generic_port(GArray *table_data, uint32_t node,
                                   const char *hid, uint32_t uid);
 
 void build_slit(GArray *table_data, BIOSLinker *linker, MachineState *ms,
-                const char *oem_id, const char *oem_table_id);
+                const char *oem_id, const char *oem_table_id,
+                const char *creator_id);
 
 void build_pptt(GArray *table_data, BIOSLinker *linker, MachineState *ms,
-                const char *oem_id, const char *oem_table_id);
+                const char *oem_id, const char *oem_table_id,
+                const char *creator_id);
 
 void build_fadt(GArray *tbl, BIOSLinker *linker, const AcpiFadtData *f,
-                const char *oem_id, const char *oem_table_id);
+                const char *oem_id, const char *oem_table_id,
+                const char *creator_id);
 
 void build_tpm2(GArray *table_data, BIOSLinker *linker, GArray *tcpalog,
-                const char *oem_id, const char *oem_table_id);
+                const char *oem_id, const char *oem_table_id,
+                const char *creator_id);
 
 void build_spcr(GArray *table_data, BIOSLinker *linker,
                 const AcpiSpcrData *f, const uint8_t rev,
-                const char *oem_id, const char *oem_table_id, const char *name);
+                const char *oem_id, const char *oem_table_id,
+                const char *creator_id, const char *name);
 #endif

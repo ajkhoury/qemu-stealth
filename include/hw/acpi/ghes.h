@@ -71,7 +71,8 @@ typedef struct AcpiGhesState {
 
 void acpi_build_hest(GArray *table_data, GArray *hardware_errors,
                      BIOSLinker *linker,
-                     const char *oem_id, const char *oem_table_id);
+                     const char *oem_id, const char *oem_table_id,
+                     const char *creator_id);
 void acpi_ghes_add_fw_cfg(AcpiGhesState *vms, FWCfgState *s,
                           GArray *hardware_errors);
 int acpi_ghes_memory_errors(uint16_t source_id, uint64_t error_physical_addr);

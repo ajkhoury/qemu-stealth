@@ -1726,7 +1726,7 @@ void acpi_table_begin(AcpiTable *desc, GArray *array)
     /* OEM Table ID */
     build_append_padded_str(array, desc->oem_table_id, 8, '\0');
     build_append_int_noprefix(array, 1, 4); /* OEM Revision */
-    g_array_append_vals(array, ACPI_BUILD_APPNAME8, 4); /* Creator ID */
+    g_array_append_vals(array, desc->creator_id, 4); /* Creator ID */
     build_append_int_noprefix(array, 1, 4); /* Creator Revision */
 }
 
@@ -1864,11 +1864,12 @@ build_rsdp(GArray *tbl, BIOSLinker *linker, AcpiRsdpData *rsdp_data)
  */
 void
 build_rsdt(GArray *table_data, BIOSLinker *linker, GArray *table_offsets,
-           const char *oem_id, const char *oem_table_id)
+           const char *oem_id, const char *oem_table_id, const char *creator_id)
 {
     int i;
     AcpiTable table = { .sig = "RSDT", .rev = 1,
-                        .oem_id = oem_id, .oem_table_id = oem_table_id };
+                        .oem_id = oem_id, .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_table_begin(&table, table_data);
     for (i = 0; i < table_offsets->len; ++i) {
@@ -1892,11 +1893,12 @@ build_rsdt(GArray *table_data, BIOSLinker *linker, GArray *table_offsets,
  */
 void
 build_xsdt(GArray *table_data, BIOSLinker *linker, GArray *table_offsets,
-           const char *oem_id, const char *oem_table_id)
+           const char *oem_id, const char *oem_table_id, const char *creator_id)
 {
     int i;
     AcpiTable table = { .sig = "XSDT", .rev = 1,
-                        .oem_id = oem_id, .oem_table_id = oem_table_id };
+                        .oem_id = oem_id, .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_table_begin(&table, table_data);
 
@@ -2024,12 +2026,14 @@ void build_srat_acpi_generic_port(GArray *table_data, uint32_t node,
  * (Revision 2.0 or later)
  */
 void build_slit(GArray *table_data, BIOSLinker *linker, MachineState *ms,
-                const char *oem_id, const char *oem_table_id)
+                const char *oem_id, const char *oem_table_id,
+                const char *creator_id)
 {
     int i, j;
     int nb_numa_nodes = ms->numa_state->num_nodes;
     AcpiTable table = { .sig = "SLIT", .rev = 1,
-                        .oem_id = oem_id, .oem_table_id = oem_table_id };
+                        .oem_id = oem_id, .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_table_begin(&table, table_data);
 
@@ -2077,10 +2081,12 @@ static void build_processor_hierarchy_node(GArray *tbl, uint32_t flags,
 
 void build_spcr(GArray *table_data, BIOSLinker *linker,
                 const AcpiSpcrData *f, const uint8_t rev,
-                const char *oem_id, const char *oem_table_id, const char *name)
+                const char *oem_id, const char *oem_table_id,
+                const char *creator_id, const char *name)
 {
     AcpiTable table = { .sig = "SPCR", .rev = rev, .oem_id = oem_id,
-                        .oem_table_id = oem_table_id };
+                        .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_table_begin(&table, table_data);
     /* Interface type */
@@ -2145,7 +2151,8 @@ void build_spcr(GArray *table_data, BIOSLinker *linker,
  * 5.2.29 Processor Properties Topology Table (PPTT)
  */
 void build_pptt(GArray *table_data, BIOSLinker *linker, MachineState *ms,
-                const char *oem_id, const char *oem_table_id)
+                const char *oem_id, const char *oem_table_id,
+                const char *creator_id)
 {
     MachineClass *mc = MACHINE_GET_CLASS(ms);
     CPUArchIdList *cpus = ms->possible_cpus;
@@ -2155,7 +2162,8 @@ void build_pptt(GArray *table_data, BIOSLinker *linker, MachineState *ms,
     uint32_t root_offset;
     int n;
     AcpiTable table = { .sig = "PPTT", .rev = 2,
-                        .oem_id = oem_id, .oem_table_id = oem_table_id };
+                        .oem_id = oem_id, .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_table_begin(&table, table_data);
 
@@ -2234,11 +2242,13 @@ void build_pptt(GArray *table_data, BIOSLinker *linker, MachineState *ms,
 
 /* build rev1/rev3/rev5.1/rev6.0 FADT */
 void build_fadt(GArray *tbl, BIOSLinker *linker, const AcpiFadtData *f,
-                const char *oem_id, const char *oem_table_id)
+                const char *oem_id, const char *oem_table_id,
+                const char *creator_id)
 {
     int off;
     AcpiTable table = { .sig = "FACP", .rev = f->rev,
-                        .oem_id = oem_id, .oem_table_id = oem_table_id };
+                        .oem_id = oem_id, .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_table_begin(&table, tbl);
 
@@ -2376,7 +2386,8 @@ done:
  * of TCG ACPI Specification, Family “1.2” and “2.0”, Version 1.2, Rev 8
  */
 void build_tpm2(GArray *table_data, BIOSLinker *linker, GArray *tcpalog,
-                const char *oem_id, const char *oem_table_id)
+                const char *oem_id, const char *oem_table_id,
+                const char *creator_id)
 {
     uint8_t start_method_params[12] = {};
     unsigned log_addr_offset;
@@ -2384,7 +2395,8 @@ void build_tpm2(GArray *table_data, BIOSLinker *linker, GArray *tcpalog,
     TPMIf *tpmif = tpm_find();
     uint32_t start_method;
     AcpiTable table = { .sig = "TPM2", .rev = 4,
-                        .oem_id = oem_id, .oem_table_id = oem_table_id };
+                        .oem_id = oem_id, .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_table_begin(&table, table_data);
 
