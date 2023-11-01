@@ -174,6 +174,7 @@ struct VirtMachineState {
     PCIBus *bus;
     char *oem_id;
     char *oem_table_id;
+    char *creator_id;
     bool ns_el2_virt_timer_irq;
 };
 

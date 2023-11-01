@@ -1012,6 +1012,7 @@ static void loongarch_machine_initfn(Object *obj)
     lams->acpi = ON_OFF_AUTO_AUTO;
     lams->oem_id = g_strndup(ACPI_BUILD_APPNAME6, 6);
     lams->oem_table_id = g_strndup(ACPI_BUILD_APPNAME8, 8);
+    lams->creator_id = g_strndup(ACPI_BUILD_APPNAME8, 4);
     virt_flash_create(lams);
 }
 

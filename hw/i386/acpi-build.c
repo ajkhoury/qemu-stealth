@@ -1439,7 +1439,8 @@ build_dsdt(GArray *table_data, BIOSLinker *linker,
     int i;
     VMBusBridge *vmbus_bridge = vmbus_bridge_find();
     AcpiTable table = { .sig = "DSDT", .rev = 1, .oem_id = x86ms->oem_id,
-                        .oem_table_id = x86ms->oem_table_id };
+                        .oem_table_id = x86ms->oem_table_id,
+                        .creator_id = x86ms->creator_id };
 
     assert(!!i440fx != !!q35);
 
@@ -1863,10 +1864,11 @@ build_dsdt(GArray *table_data, BIOSLinker *linker,
  */
 static void
 build_hpet(GArray *table_data, BIOSLinker *linker, const char *oem_id,
-           const char *oem_table_id)
+           const char *oem_table_id, const char *creator_id)
 {
     AcpiTable table = { .sig = "HPET", .rev = 1,
-                        .oem_id = oem_id, .oem_table_id = oem_table_id };
+                        .oem_id = oem_id, .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_table_begin(&table, table_data);
     /* Note timer_block_id value must be kept in sync with value advertised by
@@ -1895,11 +1897,13 @@ build_hpet(GArray *table_data, BIOSLinker *linker, const char *oem_id,
  */
 static void
 build_tpm_tcpa(GArray *table_data, BIOSLinker *linker, GArray *tcpalog,
-               const char *oem_id, const char *oem_table_id)
+               const char *oem_id, const char *oem_table_id,
+               const char *creator_id)
 {
     unsigned log_addr_offset;
     AcpiTable table = { .sig = "TCPA", .rev = 2,
-                        .oem_id = oem_id, .oem_table_id = oem_table_id };
+                        .oem_id = oem_id, .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_table_begin(&table, table_data);
     /* Platform Class */
@@ -1941,7 +1945,8 @@ build_srat(GArray *table_data, BIOSLinker *linker, MachineState *machine)
     int nb_numa_nodes = machine->numa_state->num_nodes;
     NodeInfo *numa_info = machine->numa_state->nodes;
     AcpiTable table = { .sig = "SRAT", .rev = 1, .oem_id = x86ms->oem_id,
-                        .oem_table_id = x86ms->oem_table_id };
+                        .oem_table_id = x86ms->oem_table_id,
+                        .creator_id = x86ms->creator_id };
 
     acpi_table_begin(&table, table_data);
     build_append_int_noprefix(table_data, 1, 4); /* Reserved */
@@ -2123,7 +2128,7 @@ dmar_host_bridges(Object *obj, void *opaque)
  */
 static void
 build_dmar_q35(GArray *table_data, BIOSLinker *linker, const char *oem_id,
-               const char *oem_table_id)
+               const char *oem_table_id, const char *creator_id)
 {
     uint8_t dmar_flags = 0;
     uint8_t rsvd10[10] = {};
@@ -2135,7 +2140,8 @@ build_dmar_q35(GArray *table_data, BIOSLinker *linker, const char *oem_id,
     GArray *scope_blob = g_array_new(false, true, 1);
 
     AcpiTable table = { .sig = "DMAR", .rev = 1, .oem_id = oem_id,
-                        .oem_table_id = oem_table_id };
+                        .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     /*
      * A PCI bus walk, for each PCI host bridge.
@@ -2207,10 +2213,11 @@ build_dmar_q35(GArray *table_data, BIOSLinker *linker, const char *oem_id,
  */
 static void
 build_waet(GArray *table_data, BIOSLinker *linker, const char *oem_id,
-           const char *oem_table_id)
+           const char *oem_table_id, const char *creator_id)
 {
     AcpiTable table = { .sig = "WAET", .rev = 1, .oem_id = oem_id,
-                        .oem_table_id = oem_table_id };
+                        .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_table_begin(&table, table_data);
     /*
@@ -2324,12 +2331,13 @@ ivrs_host_bridges(Object *obj, void *opaque)
 
 static void
 build_amd_iommu(GArray *table_data, BIOSLinker *linker, const char *oem_id,
-                const char *oem_table_id)
+                const char *oem_table_id, const char *creator_id)
 {
     AMDVIState *s = AMD_IOMMU_DEVICE(x86_iommu_get_default());
     GArray *ivhd_blob = g_array_new(false, true, 1);
     AcpiTable table = { .sig = "IVRS", .rev = 1, .oem_id = oem_id,
-                        .oem_table_id = oem_table_id };
+                        .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
     uint64_t feature_report;
 
     acpi_table_begin(&table, table_data);
@@ -2511,6 +2519,7 @@ void acpi_build(AcpiBuildTables *tables, MachineState *machine)
     Object *vmgenid_dev;
     char *oem_id;
     char *oem_table_id;
+    char *creator_id;
 
     acpi_get_pm_info(machine, &pm);
     acpi_get_misc_info(&misc);
@@ -2527,6 +2536,12 @@ void acpi_build(AcpiBuildTables *tables, MachineState *machine)
         oem_table_id = slic_oem.table_id;
     } else {
         oem_table_id = x86ms->oem_table_id;
+    }
+
+    if (slic_oem.creator_id) {
+        creator_id = slic_oem.creator_id;
+    } else {
+        creator_id = x86ms->creator_id;
     }
 
     table_offsets = g_array_new(false, true /* clear */,
@@ -2562,12 +2577,13 @@ void acpi_build(AcpiBuildTables *tables, MachineState *machine)
     pm.fadt.facs_tbl_offset = &facs;
     pm.fadt.dsdt_tbl_offset = &dsdt;
     pm.fadt.xdsdt_tbl_offset = &dsdt;
-    build_fadt(tables_blob, tables->linker, &pm.fadt, oem_id, oem_table_id);
+    build_fadt(tables_blob, tables->linker, &pm.fadt, oem_id, oem_table_id,
+               creator_id);
     aml_len += tables_blob->len - fadt;
 
     acpi_add_table(table_offsets, tables_blob);
     acpi_build_madt(tables_blob, tables->linker, x86ms,
-                    x86ms->oem_id, x86ms->oem_table_id);
+                    x86ms->oem_id, x86ms->oem_table_id, x86ms->creator_id);
 
 #ifdef CONFIG_ACPI_ERST
     {
@@ -2576,7 +2592,7 @@ void acpi_build(AcpiBuildTables *tables, MachineState *machine)
         if (erst_dev) {
             acpi_add_table(table_offsets, tables_blob);
             build_erst(tables_blob, tables->linker, erst_dev,
-                       x86ms->oem_id, x86ms->oem_table_id);
+                       x86ms->oem_id, x86ms->oem_table_id, x86ms->creator_id);
         }
     }
 #endif
@@ -2585,24 +2601,27 @@ void acpi_build(AcpiBuildTables *tables, MachineState *machine)
     if (vmgenid_dev) {
         acpi_add_table(table_offsets, tables_blob);
         vmgenid_build_acpi(VMGENID(vmgenid_dev), tables_blob,
-                           tables->vmgenid, tables->linker, x86ms->oem_id);
+                           tables->vmgenid, tables->linker, x86ms->oem_id,
+                           x86ms->creator_id);
     }
 
     if (misc.has_hpet) {
         acpi_add_table(table_offsets, tables_blob);
         build_hpet(tables_blob, tables->linker, x86ms->oem_id,
-                   x86ms->oem_table_id);
+                   x86ms->oem_table_id, x86ms->creator_id);
     }
 #ifdef CONFIG_TPM
     if (misc.tpm_version != TPM_VERSION_UNSPEC) {
         if (misc.tpm_version == TPM_VERSION_1_2) {
             acpi_add_table(table_offsets, tables_blob);
             build_tpm_tcpa(tables_blob, tables->linker, tables->tcpalog,
-                           x86ms->oem_id, x86ms->oem_table_id);
+                           x86ms->oem_id, x86ms->oem_table_id,
+                           x86ms->creator_id);
         } else { /* TPM_VERSION_2_0 */
             acpi_add_table(table_offsets, tables_blob);
             build_tpm2(tables_blob, tables->linker, tables->tcpalog,
-                       x86ms->oem_id, x86ms->oem_table_id);
+                       x86ms->oem_id, x86ms->oem_table_id,
+                       x86ms->creator_id);
         }
     }
 #endif
@@ -2612,46 +2631,50 @@ void acpi_build(AcpiBuildTables *tables, MachineState *machine)
         if (machine->numa_state->have_numa_distance) {
             acpi_add_table(table_offsets, tables_blob);
             build_slit(tables_blob, tables->linker, machine, x86ms->oem_id,
-                       x86ms->oem_table_id);
+                       x86ms->oem_table_id, x86ms->creator_id);
         }
         if (machine->numa_state->hmat_enabled) {
             acpi_add_table(table_offsets, tables_blob);
             build_hmat(tables_blob, tables->linker, machine->numa_state,
-                       x86ms->oem_id, x86ms->oem_table_id);
+                       x86ms->oem_id, x86ms->oem_table_id,
+                       x86ms->creator_id);
         }
     }
     if (acpi_get_mcfg(&mcfg)) {
         acpi_add_table(table_offsets, tables_blob);
         build_mcfg(tables_blob, tables->linker, &mcfg, x86ms->oem_id,
-                   x86ms->oem_table_id);
+                   x86ms->oem_table_id, x86ms->creator_id);
     }
     if (object_dynamic_cast(OBJECT(iommu), TYPE_AMD_IOMMU_DEVICE)) {
         acpi_add_table(table_offsets, tables_blob);
         build_amd_iommu(tables_blob, tables->linker, x86ms->oem_id,
-                        x86ms->oem_table_id);
+                        x86ms->oem_table_id, x86ms->creator_id);
     } else if (object_dynamic_cast(OBJECT(iommu), TYPE_INTEL_IOMMU_DEVICE)) {
         acpi_add_table(table_offsets, tables_blob);
         build_dmar_q35(tables_blob, tables->linker, x86ms->oem_id,
-                       x86ms->oem_table_id);
+                       x86ms->oem_table_id, x86ms->creator_id);
     } else if (object_dynamic_cast(OBJECT(iommu), TYPE_VIRTIO_IOMMU_PCI)) {
         PCIDevice *pdev = PCI_DEVICE(iommu);
 
         acpi_add_table(table_offsets, tables_blob);
         build_viot(machine, tables_blob, tables->linker, pci_get_bdf(pdev),
-                   x86ms->oem_id, x86ms->oem_table_id);
+                   x86ms->oem_id, x86ms->oem_table_id, x86ms->creator_id);
     }
     if (machine->nvdimms_state->is_enabled) {
         nvdimm_build_acpi(table_offsets, tables_blob, tables->linker,
                           machine->nvdimms_state, machine->ram_slots,
-                          x86ms->oem_id, x86ms->oem_table_id);
+                          x86ms->oem_id, x86ms->oem_table_id,
+                          x86ms->creator_id);
     }
     if (pcms->cxl_devices_state.is_enabled) {
         cxl_build_cedt(table_offsets, tables_blob, tables->linker,
-                       x86ms->oem_id, x86ms->oem_table_id, &pcms->cxl_devices_state);
+                       x86ms->oem_id, x86ms->oem_table_id, x86ms->creator_id,
+                       &pcms->cxl_devices_state);
     }
 
     acpi_add_table(table_offsets, tables_blob);
-    build_waet(tables_blob, tables->linker, x86ms->oem_id, x86ms->oem_table_id);
+    build_waet(tables_blob, tables->linker, x86ms->oem_id,
+               x86ms->oem_table_id, x86ms->creator_id);
 
     /* Add tables supplied by user (if any) */
     for (u = acpi_table_first(); u; u = acpi_table_next(u)) {
@@ -2664,7 +2687,7 @@ void acpi_build(AcpiBuildTables *tables, MachineState *machine)
     /* RSDT is pointed to by RSDP */
     rsdt = tables_blob->len;
     build_rsdt(tables_blob, tables->linker, table_offsets,
-               oem_id, oem_table_id);
+               oem_id, oem_table_id, creator_id);
 
     /* RSDP is in FSEG memory, so allocate it separately */
     {
@@ -2744,6 +2767,7 @@ void acpi_build(AcpiBuildTables *tables, MachineState *machine)
     g_array_free(table_offsets, true);
     g_free(slic_oem.id);
     g_free(slic_oem.table_id);
+    g_free(slic_oem.creator_id);
 }
 
 static void acpi_ram_update(MemoryRegion *mr, GArray *data)

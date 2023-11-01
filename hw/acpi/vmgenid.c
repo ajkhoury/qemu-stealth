@@ -23,13 +23,14 @@
 #include "sysemu/reset.h"
 
 void vmgenid_build_acpi(VmGenIdState *vms, GArray *table_data, GArray *guid,
-                        BIOSLinker *linker, const char *oem_id)
+                        BIOSLinker *linker, const char *oem_id, const char *creator_id)
 {
     Aml *ssdt, *dev, *scope, *method, *addr, *if_ctx;
     uint32_t vgia_offset;
     QemuUUID guid_le;
     AcpiTable table = { .sig = "SSDT", .rev = 1,
-                        .oem_id = oem_id, .oem_table_id = "VMGENID" };
+                        .oem_id = oem_id, .oem_table_id = "VMGENID",
+                        .creator_id = creator_id };
 
     /* Fill in the GUID values.  These need to be converted to little-endian
      * first, since that's what the guest expects

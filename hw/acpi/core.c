@@ -348,6 +348,7 @@ int acpi_get_slic_oem(AcpiSlicOem *oem)
         if (memcmp(hdr->sig, "SLIC", 4) == 0) {
             oem->id = g_strndup(hdr->oem_id, 6);
             oem->table_id = g_strndup(hdr->oem_table_id, 8);
+            oem->creator_id = g_strndup(hdr->asl_compiler_id, 4);
             return 0;
         }
     }

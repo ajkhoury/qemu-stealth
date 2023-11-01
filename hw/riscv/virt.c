@@ -1611,6 +1611,7 @@ static void virt_machine_instance_init(Object *obj)
 
     s->oem_id = g_strndup(ACPI_BUILD_APPNAME6, 6);
     s->oem_table_id = g_strndup(ACPI_BUILD_APPNAME8, 8);
+    s->creator_id = g_strndup(ACPI_BUILD_APPNAME8, 4);
     s->acpi = ON_OFF_AUTO_AUTO;
 }
 

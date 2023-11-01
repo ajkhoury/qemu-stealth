@@ -1343,6 +1343,29 @@ static void x86_machine_set_oem_table_id(Object *obj, const char *value,
     strncpy(x86ms->oem_table_id, value, 8);
 }
 
+static char *x86_machine_get_creator_id(Object *obj, Error **errp)
+{
+    X86MachineState *x86ms = X86_MACHINE(obj);
+
+    return g_strdup(x86ms->creator_id);
+}
+
+static void x86_machine_set_creator_id(Object *obj, const char *value,
+                                        Error **errp)
+{
+    X86MachineState *x86ms = X86_MACHINE(obj);
+    const size_t len = strlen(value);
+
+    if (len > 4) {
+        error_setg(errp,
+                   "User specified "X86_MACHINE_CREATOR_ID
+                   " value is bigger than "
+                   "4 bytes in size");
+        return;
+    }
+    strncpy(x86ms->creator_id, value, 4);
+}
+
 static void x86_machine_get_bus_lock_ratelimit(Object *obj, Visitor *v,
                                 const char *name, void *opaque, Error **errp)
 {
@@ -1402,6 +1425,7 @@ static void x86_machine_initfn(Object *obj)
     x86ms->pci_irq_mask = ACPI_BUILD_PCI_IRQS;
     x86ms->oem_id = g_strndup(ACPI_BUILD_APPNAME6, 6);
     x86ms->oem_table_id = g_strndup(ACPI_BUILD_APPNAME8, 8);
+    x86ms->creator_id = g_strndup(ACPI_BUILD_APPNAME8, 4);
     x86ms->bus_lock_ratelimit = 0;
     x86ms->above_4g_mem_start = 4 * GiB;
 }
@@ -1462,6 +1486,14 @@ static void x86_machine_class_init(ObjectClass *oc, void *data)
                                           "Override the default value of field OEM Table ID "
                                           "in ACPI table header."
                                           "The string may be up to 8 bytes in size");
+
+    object_class_property_add_str(oc, X86_MACHINE_CREATOR_ID,
+                                  x86_machine_get_creator_id,
+                                  x86_machine_set_creator_id);
+    object_class_property_set_description(oc, X86_MACHINE_CREATOR_ID,
+                                          "Override the default value of the Creator ID "
+                                          "(ASL compiler ID) field in the ACPI table header."
+                                          "The string may be up to 4 bytes in size");
 
     object_class_property_add(oc, X86_MACHINE_BUS_LOCK_RATELIMIT, "uint64_t",
                                 x86_machine_get_bus_lock_ratelimit,

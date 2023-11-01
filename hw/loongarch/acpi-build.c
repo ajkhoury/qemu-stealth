@@ -112,7 +112,8 @@ build_madt(GArray *table_data, BIOSLinker *linker, LoongArchMachineState *lams)
     const CPUArchIdList *arch_ids = mc->possible_cpu_arch_ids(ms);
     int i, arch_id;
     AcpiTable table = { .sig = "APIC", .rev = 1, .oem_id = lams->oem_id,
-                        .oem_table_id = lams->oem_table_id };
+                        .oem_table_id = lams->oem_table_id,
+                        .creator_id = lams->creator_id };
 
     acpi_table_begin(&table, table_data);
 
@@ -171,7 +172,8 @@ build_srat(GArray *table_data, BIOSLinker *linker, MachineState *machine)
     MachineClass *mc = MACHINE_GET_CLASS(lams);
     const CPUArchIdList *arch_ids = mc->possible_cpu_arch_ids(machine);
     AcpiTable table = { .sig = "SRAT", .rev = 1, .oem_id = lams->oem_id,
-                        .oem_table_id = lams->oem_table_id };
+                        .oem_table_id = lams->oem_table_id,
+                        .creator_id = lams->creator_id };
 
     acpi_table_begin(&table, table_data);
     build_append_int_noprefix(table_data, 1, 4); /* Reserved */
@@ -393,7 +395,8 @@ build_dsdt(GArray *table_data, BIOSLinker *linker, MachineState *machine)
     Aml *dsdt, *scope, *pkg;
     LoongArchMachineState *lams = LOONGARCH_MACHINE(machine);
     AcpiTable table = { .sig = "DSDT", .rev = 1, .oem_id = lams->oem_id,
-                        .oem_table_id = lams->oem_table_id };
+                        .oem_table_id = lams->oem_table_id,
+                        .creator_id = lams->creator_id };
 
     acpi_table_begin(&table, table_data);
     dsdt = init_aml_allocator();
@@ -455,14 +458,14 @@ static void acpi_build(AcpiBuildTables *tables, MachineState *machine)
     fadt_data.dsdt_tbl_offset = &dsdt;
     fadt_data.xdsdt_tbl_offset = &dsdt;
     build_fadt(tables_blob, tables->linker, &fadt_data,
-               lams->oem_id, lams->oem_table_id);
+               lams->oem_id, lams->oem_table_id, lams->creator_id);
 
     acpi_add_table(table_offsets, tables_blob);
     build_madt(tables_blob, tables->linker, lams);
 
     acpi_add_table(table_offsets, tables_blob);
     build_pptt(tables_blob, tables->linker, machine,
-               lams->oem_id, lams->oem_table_id);
+               lams->oem_id, lams->oem_table_id, lams->creator_id);
 
     acpi_add_table(table_offsets, tables_blob);
     build_srat(tables_blob, tables->linker, machine);
@@ -471,12 +474,12 @@ static void acpi_build(AcpiBuildTables *tables, MachineState *machine)
         if (machine->numa_state->have_numa_distance) {
             acpi_add_table(table_offsets, tables_blob);
             build_slit(tables_blob, tables->linker, machine, lams->oem_id,
-                       lams->oem_table_id);
+                       lams->oem_table_id, lams->creator_id);
         }
         if (machine->numa_state->hmat_enabled) {
             acpi_add_table(table_offsets, tables_blob);
             build_hmat(tables_blob, tables->linker, machine->numa_state,
-                       lams->oem_id, lams->oem_table_id);
+                       lams->oem_id, lams->oem_table_id, lams->creator_id);
         }
     }
 
@@ -487,7 +490,7 @@ static void acpi_build(AcpiBuildTables *tables, MachineState *machine)
            .size = cpu_to_le64(VIRT_PCI_CFG_SIZE),
         };
         build_mcfg(tables_blob, tables->linker, &mcfg, lams->oem_id,
-                   lams->oem_table_id);
+                   lams->oem_table_id, lams->creator_id);
     }
 
 #ifdef CONFIG_TPM
@@ -496,7 +499,7 @@ static void acpi_build(AcpiBuildTables *tables, MachineState *machine)
         acpi_add_table(table_offsets, tables_blob);
         build_tpm2(tables_blob, tables->linker,
                    tables->tcpalog, lams->oem_id,
-                   lams->oem_table_id);
+                   lams->oem_table_id, lams->creator_id);
     }
 #endif
     /* Add tables supplied by user (if any) */
@@ -510,7 +513,7 @@ static void acpi_build(AcpiBuildTables *tables, MachineState *machine)
     /* RSDT is pointed to by RSDP */
     rsdt = tables_blob->len;
     build_rsdt(tables_blob, tables->linker, table_offsets,
-               lams->oem_id, lams->oem_table_id);
+               lams->oem_id, lams->oem_table_id, lams->creator_id);
 
     /* RSDP is in FSEG memory, so allocate it separately */
     {

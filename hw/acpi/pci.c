@@ -33,10 +33,12 @@
  * 4.1.2 MCFG Table Description.
  */
 void build_mcfg(GArray *table_data, BIOSLinker *linker, AcpiMcfgInfo *info,
-                const char *oem_id, const char *oem_table_id)
+                const char *oem_id, const char *oem_table_id,
+                const char *creator_id)
 {
     AcpiTable table = { .sig = "MCFG", .rev = 1,
-                        .oem_id = oem_id, .oem_table_id = oem_table_id };
+                        .oem_id = oem_id, .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_table_begin(&table, table_data);
 

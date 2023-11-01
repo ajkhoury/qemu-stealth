@@ -360,10 +360,12 @@ static void build_ghes_v2(GArray *table_data, int source_id, BIOSLinker *linker)
 
 /* Build Hardware Error Source Table */
 void acpi_build_hest(GArray *table_data, BIOSLinker *linker,
-                     const char *oem_id, const char *oem_table_id)
+                     const char *oem_id, const char *oem_table_id,
+                     const char *creator_id)
 {
     AcpiTable table = { .sig = "HEST", .rev = 1,
-                        .oem_id = oem_id, .oem_table_id = oem_table_id };
+                        .oem_id = oem_id, .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_table_begin(&table, table_data);
 

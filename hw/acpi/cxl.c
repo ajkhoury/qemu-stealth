@@ -200,11 +200,13 @@ static int cxl_foreach_pxb_hb(Object *obj, void *opaque)
 
 void cxl_build_cedt(GArray *table_offsets, GArray *table_data,
                     BIOSLinker *linker, const char *oem_id,
-                    const char *oem_table_id, CXLState *cxl_state)
+                    const char *oem_table_id, const char *creator_id,
+                    CXLState *cxl_state)
 {
     Aml *cedt;
     AcpiTable table = { .sig = "CEDT", .rev = 1, .oem_id = oem_id,
-                        .oem_table_id = oem_table_id };
+                        .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_add_table(table_offsets, table_data);
     acpi_table_begin(&table, table_data);

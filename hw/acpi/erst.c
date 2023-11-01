@@ -227,7 +227,7 @@ static void build_serialization_instruction(
 
 /* ACPI 4.0: 17.4.1 Serialization Action Table */
 void build_erst(GArray *table_data, BIOSLinker *linker, Object *erst_dev,
-    const char *oem_id, const char *oem_table_id)
+    const char *oem_id, const char *oem_table_id, const char *creator_id)
 {
     /*
      * Serialization Action Table
@@ -239,7 +239,8 @@ void build_erst(GArray *table_data, BIOSLinker *linker, Object *erst_dev,
     GArray *table_instruction_data = g_array_new(FALSE, FALSE, sizeof(char));
     pcibus_t bar0 = pci_get_bar_addr(PCI_DEVICE(erst_dev), 0);
     AcpiTable table = { .sig = "ERST", .rev = 1, .oem_id = oem_id,
-                        .oem_table_id = oem_table_id };
+                        .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
     /* Contexts for the different ways ACTION and VALUE are accessed */
     BuildSerializationInstructionEntry rd_value_32_val = {
         .table_data = table_instruction_data, .bar = bar0, .flags = 0,

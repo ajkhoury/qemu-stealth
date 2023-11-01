@@ -277,7 +277,8 @@ build_iort(GArray *table_data, BIOSLinker *linker, VirtMachineState *vms)
     GArray *its_idmaps = g_array_new(false, true, sizeof(AcpiIortIdMapping));
 
     AcpiTable table = { .sig = "IORT", .rev = 3, .oem_id = vms->oem_id,
-                        .oem_table_id = vms->oem_table_id };
+                        .oem_table_id = vms->oem_table_id,
+                        .creator_id = vms->creator_id };
     /* Table 2 The IORT */
     acpi_table_begin(&table, table_data);
 
@@ -459,7 +460,8 @@ spcr_setup(GArray *table_data, BIOSLinker *linker, VirtMachineState *vms)
         .pci_segment = 0,
     };
 
-    build_spcr(table_data, linker, &serial, 2, vms->oem_id, vms->oem_table_id);
+    build_spcr(table_data, linker, &serial, 2, vms->oem_id, vms->oem_table_id,
+               vms->creator_id);
 }
 
 /*
@@ -475,7 +477,8 @@ build_srat(GArray *table_data, BIOSLinker *linker, VirtMachineState *vms)
     MachineState *ms = MACHINE(vms);
     const CPUArchIdList *cpu_list = mc->possible_cpu_arch_ids(ms);
     AcpiTable table = { .sig = "SRAT", .rev = 3, .oem_id = vms->oem_id,
-                        .oem_table_id = vms->oem_table_id };
+                        .oem_table_id = vms->oem_table_id,
+                        .creator_id = vms->creator_id };
 
     acpi_table_begin(&table, table_data);
     build_append_int_noprefix(table_data, 1, 4); /* Reserved */
@@ -538,7 +541,8 @@ build_gtdt(GArray *table_data, BIOSLinker *linker, VirtMachineState *vms)
         1 : /* Interrupt is Edge triggered */
         0;  /* Interrupt is Level triggered  */
     AcpiTable table = { .sig = "GTDT", .rev = 3, .oem_id = vms->oem_id,
-                        .oem_table_id = vms->oem_table_id };
+                        .oem_table_id = vms->oem_table_id,
+                        .creator_id = vms->creator_id };
 
     acpi_table_begin(&table, table_data);
 
@@ -590,7 +594,8 @@ static void
 build_dbg2(GArray *table_data, BIOSLinker *linker, VirtMachineState *vms)
 {
     AcpiTable table = { .sig = "DBG2", .rev = 0, .oem_id = vms->oem_id,
-                        .oem_table_id = vms->oem_table_id };
+                        .oem_table_id = vms->oem_table_id,
+                        .creator_id = vms->creator_id };
     int dbg2devicelength;
     const char name[] = "COM0";
     const int namespace_length = sizeof(name);
@@ -664,7 +669,8 @@ build_madt(GArray *table_data, BIOSLinker *linker, VirtMachineState *vms)
     VirtMachineClass *vmc = VIRT_MACHINE_GET_CLASS(vms);
     const MemMapEntry *memmap = vms->memmap;
     AcpiTable table = { .sig = "APIC", .rev = 4, .oem_id = vms->oem_id,
-                        .oem_table_id = vms->oem_table_id };
+                        .oem_table_id = vms->oem_table_id,
+                        .creator_id = vms->creator_id };
 
     acpi_table_begin(&table, table_data);
     /* Local Interrupt Controller Address */
@@ -791,7 +797,8 @@ static void build_fadt_rev6(GArray *table_data, BIOSLinker *linker,
         g_assert_not_reached();
     }
 
-    build_fadt(table_data, linker, &fadt, vms->oem_id, vms->oem_table_id);
+    build_fadt(table_data, linker, &fadt, vms->oem_id, vms->oem_table_id,
+               vms->creator_id);
 }
 
 /* DSDT */
@@ -804,7 +811,8 @@ build_dsdt(GArray *table_data, BIOSLinker *linker, VirtMachineState *vms)
     const MemMapEntry *memmap = vms->memmap;
     const int *irqmap = vms->irqmap;
     AcpiTable table = { .sig = "DSDT", .rev = 2, .oem_id = vms->oem_id,
-                        .oem_table_id = vms->oem_table_id };
+                        .oem_table_id = vms->oem_table_id,
+                        .creator_id = vms->creator_id };
 
     acpi_table_begin(&table, table_data);
     dsdt = init_aml_allocator();
@@ -910,7 +918,8 @@ void virt_acpi_build(VirtMachineState *vms, AcpiBuildTables *tables)
     if (!vmc->no_cpu_topology) {
         acpi_add_table(table_offsets, tables_blob);
         build_pptt(tables_blob, tables->linker, ms,
-                   vms->oem_id, vms->oem_table_id);
+                   vms->oem_id, vms->oem_table_id,
+                   vms->creator_id);
     }
 
     acpi_add_table(table_offsets, tables_blob);
@@ -923,7 +932,7 @@ void virt_acpi_build(VirtMachineState *vms, AcpiBuildTables *tables)
            .size = vms->memmap[VIRT_ECAM_ID(vms->highmem_ecam)].size,
         };
         build_mcfg(tables_blob, tables->linker, &mcfg, vms->oem_id,
-                   vms->oem_table_id);
+                   vms->oem_table_id, vms->creator_id);
     }
 
     acpi_add_table(table_offsets, tables_blob);
@@ -936,7 +945,7 @@ void virt_acpi_build(VirtMachineState *vms, AcpiBuildTables *tables)
         build_ghes_error_table(tables->hardware_errors, tables->linker);
         acpi_add_table(table_offsets, tables_blob);
         acpi_build_hest(tables_blob, tables->linker, vms->oem_id,
-                        vms->oem_table_id);
+                        vms->oem_table_id, vms->creator_id);
     }
 
     if (ms->numa_state->num_nodes > 0) {
@@ -945,20 +954,20 @@ void virt_acpi_build(VirtMachineState *vms, AcpiBuildTables *tables)
         if (ms->numa_state->have_numa_distance) {
             acpi_add_table(table_offsets, tables_blob);
             build_slit(tables_blob, tables->linker, ms, vms->oem_id,
-                       vms->oem_table_id);
+                       vms->oem_table_id, vms->creator_id);
         }
 
         if (ms->numa_state->hmat_enabled) {
             acpi_add_table(table_offsets, tables_blob);
             build_hmat(tables_blob, tables->linker, ms->numa_state,
-                       vms->oem_id, vms->oem_table_id);
+                       vms->oem_id, vms->oem_table_id, vms->creator_id);
         }
     }
 
     if (ms->nvdimms_state->is_enabled) {
         nvdimm_build_acpi(table_offsets, tables_blob, tables->linker,
                           ms->nvdimms_state, ms->ram_slots, vms->oem_id,
-                          vms->oem_table_id);
+                          vms->oem_table_id, vms->creator_id);
     }
 
     if (its_class_name() && !vmc->no_its) {
@@ -970,20 +979,20 @@ void virt_acpi_build(VirtMachineState *vms, AcpiBuildTables *tables)
     if (tpm_get_version(tpm_find()) == TPM_VERSION_2_0) {
         acpi_add_table(table_offsets, tables_blob);
         build_tpm2(tables_blob, tables->linker, tables->tcpalog, vms->oem_id,
-                   vms->oem_table_id);
+                   vms->oem_table_id, vms->creator_id);
     }
 #endif
 
     if (vms->iommu == VIRT_IOMMU_VIRTIO) {
         acpi_add_table(table_offsets, tables_blob);
         build_viot(ms, tables_blob, tables->linker, vms->virtio_iommu_bdf,
-                   vms->oem_id, vms->oem_table_id);
+                   vms->oem_id, vms->oem_table_id, vms->creator_id);
     }
 
     /* XSDT is pointed to by RSDP */
     xsdt = tables_blob->len;
     build_xsdt(tables_blob, tables->linker, table_offsets, vms->oem_id,
-               vms->oem_table_id);
+               vms->oem_table_id, vms->creator_id);
 
     /* RSDP is in FSEG memory, so allocate it separately */
     {

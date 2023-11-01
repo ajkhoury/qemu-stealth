@@ -2551,6 +2551,27 @@ static void virt_set_oem_table_id(Object *obj, const char *value,
     strncpy(vms->oem_table_id, value, 8);
 }
 
+static char *virt_get_creator_id(Object *obj, Error **errp)
+{
+    VirtMachineState *vms = VIRT_MACHINE(obj);
+
+    return g_strdup(vms->creator_id);
+}
+
+static void virt_set_creator_id(Object *obj, const char *value,
+                                  Error **errp)
+{
+    VirtMachineState *vms = VIRT_MACHINE(obj);
+    const size_t len = strlen(value);
+
+    if (len > 4) {
+        error_setg(errp,
+                   "User specified creator-id value is bigger than 4 bytes in size");
+        return;
+    }
+    strncpy(vms->creator_id, value, 4);
+}
+
 
 bool virt_is_acpi_enabled(VirtMachineState *vms)
 {
@@ -3160,7 +3181,6 @@ static void virt_machine_class_init(ObjectClass *oc, void *data)
                                           "in ACPI table header."
                                           "The string may be up to 6 bytes in size");
 
-
     object_class_property_add_str(oc, "x-oem-table-id",
                                   virt_get_oem_table_id,
                                   virt_set_oem_table_id);
@@ -3168,6 +3188,14 @@ static void virt_machine_class_init(ObjectClass *oc, void *data)
                                           "Override the default value of field OEM Table ID "
                                           "in ACPI table header."
                                           "The string may be up to 8 bytes in size");
+
+    object_class_property_add_str(oc, "x-creator-id",
+                                  virt_get_creator_id,
+                                  virt_set_creator_id);
+    object_class_property_set_description(oc, "x-creator-id",
+                                          "Override the default value of the Creator ID field "
+                                          "in the ACPI table header."
+                                          "The string may be up to 4 bytes in size");
 
 }
 
@@ -3228,6 +3256,7 @@ static void virt_instance_init(Object *obj)
 
     vms->oem_id = g_strndup(ACPI_BUILD_APPNAME6, 6);
     vms->oem_table_id = g_strndup(ACPI_BUILD_APPNAME8, 8);
+    vms->creator_id = g_strndup(ACPI_BUILD_APPNAME8, 4);
 }
 
 static const TypeInfo virt_machine_info = {

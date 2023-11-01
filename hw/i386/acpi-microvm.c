@@ -108,7 +108,8 @@ build_dsdt_microvm(GArray *table_data, BIOSLinker *linker,
     bool ambiguous;
     Object *isabus;
     AcpiTable table = { .sig = "DSDT", .rev = 2, .oem_id = x86ms->oem_id,
-                        .oem_table_id = x86ms->oem_table_id };
+                        .oem_table_id = x86ms->oem_table_id,
+                        .creator_id = x86ms->creator_id };
 
     isabus = object_resolve_path_type("", TYPE_ISA_BUS, &ambiguous);
     assert(isabus);
@@ -199,11 +200,11 @@ static void acpi_build_microvm(AcpiBuildTables *tables,
     pmfadt.xdsdt_tbl_offset = &dsdt;
     acpi_add_table(table_offsets, tables_blob);
     build_fadt(tables_blob, tables->linker, &pmfadt, x86ms->oem_id,
-               x86ms->oem_table_id);
+               x86ms->oem_table_id, x86ms->creator_id);
 
     acpi_add_table(table_offsets, tables_blob);
     acpi_build_madt(tables_blob, tables->linker, X86_MACHINE(machine),
-                    x86ms->oem_id, x86ms->oem_table_id);
+                    x86ms->oem_id, x86ms->oem_table_id, x86ms->creator_id);
 
 #ifdef CONFIG_ACPI_ERST
     {
@@ -212,14 +213,15 @@ static void acpi_build_microvm(AcpiBuildTables *tables,
         if (erst_dev) {
             acpi_add_table(table_offsets, tables_blob);
             build_erst(tables_blob, tables->linker, erst_dev,
-                       x86ms->oem_id, x86ms->oem_table_id);
+                       x86ms->oem_id, x86ms->oem_table_id,
+                       x86ms->creator_id);
         }
     }
 #endif
 
     xsdt = tables_blob->len;
     build_xsdt(tables_blob, tables->linker, table_offsets, x86ms->oem_id,
-               x86ms->oem_table_id);
+               x86ms->oem_table_id, x86ms->creator_id);
 
     /* RSDP is in FSEG memory, so allocate it separately */
     {

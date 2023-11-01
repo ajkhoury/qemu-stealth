@@ -15,7 +15,8 @@
 #include "qom/object.h"
 
 void build_erst(GArray *table_data, BIOSLinker *linker, Object *erst_dev,
-                const char *oem_id, const char *oem_table_id);
+                const char *oem_id, const char *oem_table_id,
+                const char *creator_id);
 
 #define TYPE_ACPI_ERST "acpi-erst"
 

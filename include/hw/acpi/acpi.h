@@ -197,6 +197,7 @@ typedef struct AcpiSlicOem AcpiSlicOem;
 struct AcpiSlicOem {
   char *id;
   char *table_id;
+  char *creator_id;
 };
 int acpi_get_slic_oem(AcpiSlicOem *oem);
 
