@@ -95,7 +95,8 @@ void acpi_build_hest(AcpiGhesState *ags, GArray *table_data,
                      BIOSLinker *linker,
                      const AcpiNotificationSourceId * const notif_source,
                      int num_sources,
-                     const char *oem_id, const char *oem_table_id);
+                     const char *oem_id, const char *oem_table_id,
+                     const char *creator_id);
 void acpi_ghes_add_fw_cfg(AcpiGhesState *vms, FWCfgState *s,
                           GArray *hardware_errors);
 bool acpi_ghes_memory_errors(AcpiGhesState *ags, uint16_t source_id,

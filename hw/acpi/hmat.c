@@ -268,10 +268,12 @@ static void hmat_build_table_structs(GArray *table_data, NumaState *numa_state)
 }
 
 void build_hmat(GArray *table_data, BIOSLinker *linker, NumaState *numa_state,
-                const char *oem_id, const char *oem_table_id)
+                const char *oem_id, const char *oem_table_id,
+                const char *creator_id)
 {
     AcpiTable table = { .sig = "HMAT", .rev = 2,
-                        .oem_id = oem_id, .oem_table_id = oem_table_id };
+                        .oem_id = oem_id, .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_table_begin(&table, table_data);
     hmat_build_table_structs(table_data, numa_state);

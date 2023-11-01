@@ -401,11 +401,13 @@ void nvdimm_plug(NVDIMMState *state)
 
 static void nvdimm_build_nfit(NVDIMMState *state, GArray *table_offsets,
                               GArray *table_data, BIOSLinker *linker,
-                              const char *oem_id, const char *oem_table_id)
+                              const char *oem_id, const char *oem_table_id,
+                              const char *creator_id)
 {
     NvdimmFitBuffer *fit_buf = &state->fit_buf;
     AcpiTable table = { .sig = "NFIT", .rev = 1,
-                        .oem_id = oem_id, .oem_table_id = oem_table_id };
+                        .oem_id = oem_id, .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
 
     acpi_add_table(table_offsets, table_data);
 
@@ -1370,12 +1372,14 @@ static void nvdimm_build_nvdimm_devices(Aml *root_dev, uint32_t ram_slots)
 static void nvdimm_build_ssdt(GArray *table_offsets, GArray *table_data,
                               BIOSLinker *linker,
                               NVDIMMState *nvdimm_state,
-                              uint32_t ram_slots, const char *oem_id)
+                              uint32_t ram_slots, const char *oem_id,
+                              const char *creator_id)
 {
     int mem_addr_offset;
     Aml *ssdt, *sb_scope, *dev;
     AcpiTable table = { .sig = "SSDT", .rev = 1,
-                        .oem_id = oem_id, .oem_table_id = "NVDIMM" };
+                        .oem_id = oem_id, .oem_table_id = "NVDIMM",
+                        .creator_id = creator_id };
 
     acpi_add_table(table_offsets, table_data);
 
@@ -1452,7 +1456,7 @@ void nvdimm_build_srat(GArray *table_data)
 void nvdimm_build_acpi(GArray *table_offsets, GArray *table_data,
                        BIOSLinker *linker, NVDIMMState *state,
                        uint32_t ram_slots, const char *oem_id,
-                       const char *oem_table_id)
+                       const char *oem_table_id, const char *creator_id)
 {
     GSList *device_list;
 
@@ -1462,7 +1466,7 @@ void nvdimm_build_acpi(GArray *table_offsets, GArray *table_data,
     }
 
     nvdimm_build_ssdt(table_offsets, table_data, linker, state,
-                      ram_slots, oem_id);
+                      ram_slots, oem_id, creator_id);
 
     device_list = nvdimm_get_device_list();
     /* no NVDIMM device is plugged. */
@@ -1471,6 +1475,6 @@ void nvdimm_build_acpi(GArray *table_offsets, GArray *table_data,
     }
 
     nvdimm_build_nfit(state, table_offsets, table_data, linker,
-                      oem_id, oem_table_id);
+                      oem_id, oem_table_id, creator_id);
     g_slist_free(device_list);
 }

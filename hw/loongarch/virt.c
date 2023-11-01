@@ -1084,6 +1084,26 @@ static void virt_set_oem_table_id(Object *obj, const char *value,
     strncpy(lvms->oem_table_id, value, 8);
 }
 
+static char *virt_get_creator_id(Object *obj, Error **errp)
+{
+    LoongArchVirtMachineState *lvms = LOONGARCH_VIRT_MACHINE(obj);
+
+    return g_strdup(lvms->creator_id);
+}
+
+static void virt_set_creator_id(Object *obj, const char *value, Error **errp)
+{
+    LoongArchVirtMachineState *lvms = LOONGARCH_VIRT_MACHINE(obj);
+    size_t len = strlen(value);
+
+    if (len > 8) {
+        error_setg(errp,
+                   "User specified creator-id value is bigger than 4 bytes in size");
+        return;
+    }
+    strncpy(lvms->creator_id, value, 4);
+}
+
 static void virt_initfn(Object *obj)
 {
     LoongArchVirtMachineState *lvms = LOONGARCH_VIRT_MACHINE(obj);
@@ -1096,6 +1116,7 @@ static void virt_initfn(Object *obj)
     lvms->acpi = ON_OFF_AUTO_AUTO;
     lvms->oem_id = g_strndup(ACPI_BUILD_APPNAME6, 6);
     lvms->oem_table_id = g_strndup(ACPI_BUILD_APPNAME8, 8);
+    lvms->creator_id = g_strndup(ACPI_BUILD_APPNAME8, 4);
     virt_flash_create(lvms);
 }
 
@@ -1533,6 +1554,14 @@ static void virt_class_init(ObjectClass *oc, const void *data)
     object_class_property_set_description(oc, "highmem-mmio-size",
                                           "Set the high memory region size "
                                           "for PCI MMIO");
+
+    object_class_property_add_str(oc, "x-creator-id",
+                                  virt_get_creator_id,
+                                  virt_set_creator_id);
+    object_class_property_set_description(oc, "x-creator-id",
+                                          "Override the default value of the Creator ID field "
+                                          "in the ACPI table header."
+                                          "The string may be up to 4 bytes in size");
 }
 
 #define DEFINE_VIRT_MACHINE_VERSION(latest, ...) \

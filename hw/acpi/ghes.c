@@ -373,10 +373,12 @@ void acpi_build_hest(AcpiGhesState *ags, GArray *table_data,
                      BIOSLinker *linker,
                      const AcpiNotificationSourceId *notif_source,
                      int num_sources,
-                     const char *oem_id, const char *oem_table_id)
+                     const char *oem_id, const char *oem_table_id,
+                     const char *creator_id)
 {
     AcpiTable table = { .sig = "HEST", .rev = 1,
-                        .oem_id = oem_id, .oem_table_id = oem_table_id };
+                        .oem_id = oem_id, .oem_table_id = oem_table_id,
+                        .creator_id = creator_id };
     uint32_t hest_offset;
     int i;
 
