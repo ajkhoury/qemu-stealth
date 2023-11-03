@@ -578,6 +578,7 @@ static void smbios_build_type_0_table(void)
     if (smbios_type0.uefi) {
         t->bios_characteristics_extension_bytes[1] |= 0x08; /* |= UEFI */
     }
+    t->bios_characteristics_extension_bytes[1] &= ~0x10; /* &= ~VM */
 
     if (smbios_type0.have_major_minor) {
         t->system_bios_major_release = smbios_type0.major;
