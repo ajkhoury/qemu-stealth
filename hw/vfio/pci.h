@@ -24,8 +24,6 @@
 #include "system/kvm.h"
 #include "vfio-display.h"
 
-#define PCI_ANY_ID (~0)
-
 struct VFIOPCIDevice;
 
 typedef struct VFIOIOEventFD {

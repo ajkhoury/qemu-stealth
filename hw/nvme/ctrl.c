@@ -9095,8 +9095,29 @@ static bool nvme_init_pci(NvmeCtrl *n, PCIDevice *pci_dev, Error **errp)
         pci_config_set_vendor_id(pci_conf, PCI_VENDOR_ID_INTEL);
         pci_config_set_device_id(pci_conf, PCI_DEVICE_ID_INTEL_NVME);
     } else {
-        pci_config_set_vendor_id(pci_conf, PCI_VENDOR_ID_REDHAT);
-        pci_config_set_device_id(pci_conf, PCI_DEVICE_ID_REDHAT_NVME);
+        /* Set the PCI Device/Vendor IDs */
+        PCIDeviceClass *const pc = PCI_DEVICE_GET_CLASS(pci_dev);
+        if (n->params.vendor_id != PCI_ANY_ID) {
+            pc->vendor_id = n->params.vendor_id;
+            pci_config_set_vendor_id(pci_conf, pc->vendor_id);
+        } else {
+            pci_config_set_vendor_id(pci_conf, PCI_VENDOR_ID_REDHAT);
+        }
+        if (n->params.device_id != PCI_ANY_ID) {
+            pc->device_id = n->params.device_id;
+            pci_config_set_device_id(pci_conf, pc->device_id);
+        } else {
+            pci_config_set_device_id(pci_conf, PCI_DEVICE_ID_REDHAT_NVME);
+        }
+        if (n->params.sub_vendor_id != PCI_ANY_ID) {
+            pc->subsystem_vendor_id = n->params.sub_vendor_id;
+            pci_set_word(pci_conf + PCI_SUBSYSTEM_VENDOR_ID,
+                         pc->subsystem_vendor_id);
+        }
+        if (n->params.sub_device_id != PCI_ANY_ID) {
+            pc->subsystem_id = n->params.sub_device_id;
+            pci_set_word(pci_conf + PCI_SUBSYSTEM_ID, pc->subsystem_id);
+        }
     }
 
     pci_config_set_class(pci_conf, PCI_CLASS_STORAGE_EXPRESS);
@@ -9761,6 +9782,15 @@ static const Property nvme_props[] = {
     DEFINE_PROP_UINT16("atomic.awun", NvmeCtrl, params.atomic_awun, 0),
     DEFINE_PROP_UINT16("atomic.awupf", NvmeCtrl, params.atomic_awupf, 0),
     DEFINE_PROP_BOOL("ocp", NvmeCtrl, params.ocp, false),
+
+    DEFINE_PROP_UINT32("x-pci-vendor-id", NvmeCtrl,
+                       params.vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-device-id", NvmeCtrl,
+                       params.device_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-vendor-id", NvmeCtrl,
+                       params.sub_vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-device-id", NvmeCtrl,
+                       params.sub_device_id, PCI_ANY_ID),
 };
 
 static void nvme_get_smart_warning(Object *obj, Visitor *v, const char *name,

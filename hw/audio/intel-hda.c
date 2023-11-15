@@ -197,6 +197,11 @@ struct IntelHDAState {
     uint32_t debug;
     OnOffAuto msi;
     bool old_msi_addr;
+
+    uint32_t vendor_id;
+    uint32_t device_id;
+    uint32_t sub_vendor_id;
+    uint32_t sub_device_id;
 };
 
 #define TYPE_INTEL_HDA_GENERIC "intel-hda-generic"
@@ -1093,6 +1098,26 @@ static void intel_hda_realize(PCIDevice *pci, Error **errp)
     Error *err = NULL;
     int ret;
 
+    /* Set the PCI Device/Vendor IDs */
+    PCIDeviceClass *const pc = PCI_DEVICE_GET_CLASS(pci);
+    if (d->vendor_id != PCI_ANY_ID) {
+        pc->vendor_id = d->vendor_id;
+        pci_config_set_vendor_id(conf, pc->vendor_id);
+    }
+    if (d->device_id != PCI_ANY_ID) {
+        pc->device_id = d->device_id;
+        pci_config_set_device_id(conf, pc->device_id);
+    }
+    if (d->sub_vendor_id != PCI_ANY_ID) {
+        pc->subsystem_vendor_id = d->sub_vendor_id;
+        pci_set_word(conf + PCI_SUBSYSTEM_VENDOR_ID,
+                     pc->subsystem_vendor_id);
+    }
+    if (d->sub_device_id != PCI_ANY_ID) {
+        pc->subsystem_id = d->sub_device_id;
+        pci_set_word(conf + PCI_SUBSYSTEM_ID, pc->subsystem_id);
+    }
+
     d->name = object_get_typename(OBJECT(d));
 
     pci_config_set_interrupt_pin(conf, 1);
@@ -1218,6 +1243,13 @@ static const Property intel_hda_properties[] = {
     DEFINE_PROP_UINT32("debug", IntelHDAState, debug, 0),
     DEFINE_PROP_ON_OFF_AUTO("msi", IntelHDAState, msi, ON_OFF_AUTO_AUTO),
     DEFINE_PROP_BOOL("old_msi_addr", IntelHDAState, old_msi_addr, false),
+
+    DEFINE_PROP_UINT32("x-pci-vendor-id", IntelHDAState, vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-device-id", IntelHDAState, device_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-vendor-id", IntelHDAState,
+                       sub_vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-device-id", IntelHDAState,
+                       sub_device_id, PCI_ANY_ID),
 };
 
 static void intel_hda_class_init(ObjectClass *klass, const void *data)

@@ -556,6 +556,10 @@ typedef struct NvmeParams {
     char     *serial;
     char     *model;
     char     *firmware_version;
+    uint32_t vendor_id;
+    uint32_t device_id;
+    uint32_t sub_vendor_id;
+    uint32_t sub_device_id;
     uint32_t num_queues; /* deprecated since 5.1 */
     uint32_t max_ioqpairs;
     uint16_t msix_qsize;
