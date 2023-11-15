@@ -26,6 +26,11 @@ struct PCIEPCIBridge {
     OnOffAuto msi;
     MemoryRegion shpc_bar;
     /*< public >*/
+
+    uint32_t vendor_id;
+    uint32_t device_id;
+    uint32_t sub_vendor_id;
+    uint32_t sub_device_id;
 };
 
 #define TYPE_PCIE_PCI_BRIDGE_DEV "pcie-pci-bridge"
@@ -35,9 +40,32 @@ static void pcie_pci_bridge_realize(PCIDevice *d, Error **errp)
 {
     PCIBridge *br = PCI_BRIDGE(d);
     PCIEPCIBridge *pcie_br = PCIE_PCI_BRIDGE_DEV(d);
+    PCIDeviceClass *dc = PCI_DEVICE_GET_CLASS(d);
     int rc, pos;
 
     pci_bridge_initfn(d, TYPE_PCI_BUS);
+
+    /* Set the override PCI Device/Vendor IDs */
+    if (pcie_br->vendor_id != PCI_ANY_ID) {
+        dc->vendor_id = pcie_br->vendor_id;
+        pci_config_set_vendor_id(d->config, pcie_br->vendor_id);
+    }
+    if (pcie_br->device_id != PCI_ANY_ID) {
+        dc->device_id = pcie_br->device_id;
+        pci_config_set_device_id(d->config, pcie_br->device_id);
+    }
+    //if (pcie_br->sub_vendor_id != PCI_ANY_ID ||
+    //    pcie_br->sub_device_id != PCI_ANY_ID) {
+    //    const uint16_t svid = (pcie_br->sub_vendor_id != PCI_ANY_ID) ?
+    //                           pcie_br->sub_vendor_id : dc->vendor_id;
+    //    const uint16_t ssid = (pcie_br->sub_device_id != PCI_ANY_ID) ?
+    //                           pcie_br->sub_device_id : dc->device_id;
+    //    rc = pci_bridge_ssvid_init(d, 0, svid, ssid, errp);
+    //    if (rc < 0) {
+    //        error_append_hint(errp, "Can't init SSV ID, error %d\n", rc);
+    //        goto error;
+    //    }
+    //}
 
     d->config[PCI_INTERRUPT_PIN] = 0x1;
     memory_region_init(&pcie_br->shpc_bar, OBJECT(d), "shpc-bar",
@@ -126,6 +154,14 @@ static void pcie_pci_bridge_write_config(PCIDevice *d,
 
 static Property pcie_pci_bridge_dev_properties[] = {
         DEFINE_PROP_ON_OFF_AUTO("msi", PCIEPCIBridge, msi, ON_OFF_AUTO_AUTO),
+        DEFINE_PROP_UINT32("x-pci-vendor-id", PCIEPCIBridge,
+                           vendor_id, PCI_ANY_ID),
+        DEFINE_PROP_UINT32("x-pci-device-id", PCIEPCIBridge,
+                           device_id, PCI_ANY_ID),
+        DEFINE_PROP_UINT32("x-pci-sub-vendor-id", PCIEPCIBridge,
+                           sub_vendor_id, PCI_ANY_ID),
+        DEFINE_PROP_UINT32("x-pci-sub-device-id", PCIEPCIBridge,
+                           sub_device_id, PCI_ANY_ID),
         DEFINE_PROP_END_OF_LIST(),
 };
 

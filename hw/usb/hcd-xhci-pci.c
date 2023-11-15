@@ -110,6 +110,26 @@ static void usb_xhci_pci_realize(struct PCIDevice *dev, Error **errp)
     Error *err = NULL;
     XHCIPciState *s = XHCI_PCI(dev);
 
+    /* Set the PCI Device/Vendor IDs */
+    PCIDeviceClass *dc = PCI_DEVICE_GET_CLASS(dev);
+    if (s->vendor_id != PCI_ANY_ID) {
+        dc->vendor_id = s->vendor_id;
+        pci_config_set_vendor_id(dev->config, dc->vendor_id);
+    }
+    if (s->device_id != PCI_ANY_ID) {
+        dc->device_id = s->device_id;
+        pci_config_set_device_id(dev->config, dc->device_id);
+    }
+    if (s->sub_vendor_id != PCI_ANY_ID) {
+        dc->subsystem_vendor_id = s->sub_vendor_id;
+        pci_set_word(dev->config + PCI_SUBSYSTEM_VENDOR_ID,
+                     dc->subsystem_vendor_id);
+    }
+    if (s->sub_device_id != PCI_ANY_ID) {
+        dc->subsystem_id = s->sub_device_id;
+        pci_set_word(dev->config + PCI_SUBSYSTEM_ID, dc->subsystem_id);
+    }
+
     dev->config[PCI_CLASS_PROG] = 0x30;    /* xHCI */
     dev->config[PCI_INTERRUPT_PIN] = 0x01; /* interrupt pin 1 */
     dev->config[PCI_CACHE_LINE_SIZE] = 0x10;
@@ -189,6 +209,10 @@ static const VMStateDescription vmstate_xhci_pci = {
 static void xhci_instance_init(Object *obj)
 {
     XHCIPciState *s = XHCI_PCI(obj);
+    s->vendor_id = PCI_ANY_ID;
+    s->device_id = PCI_ANY_ID;
+    s->sub_vendor_id = PCI_ANY_ID;
+    s->sub_device_id = PCI_ANY_ID;
     /*
      * QEMU_PCI_CAP_EXPRESS initialization does not depend on QEMU command
      * line, therefore, no need to wait to realize like other devices
@@ -225,13 +249,27 @@ static const TypeInfo xhci_pci_info = {
     },
 };
 
+static Property qemu_xhci_props[] = {
+    DEFINE_PROP_UINT32("x-pci-vendor-id", XHCIPciState,
+                       vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-device-id", XHCIPciState,
+                       device_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-vendor-id", XHCIPciState,
+                       sub_vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-device-id", XHCIPciState,
+                       sub_device_id, PCI_ANY_ID),
+    DEFINE_PROP_END_OF_LIST()
+};
+
 static void qemu_xhci_class_init(ObjectClass *klass, void *data)
 {
     PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);
+    DeviceClass *dc = DEVICE_CLASS(klass);
 
     k->vendor_id    = PCI_VENDOR_ID_REDHAT;
     k->device_id    = PCI_DEVICE_ID_REDHAT_XHCI;
     k->revision     = 0x01;
+    device_class_set_props(dc, qemu_xhci_props);
 }
 
 static void qemu_xhci_instance_init(Object *obj)

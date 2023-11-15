@@ -21,8 +21,6 @@
 #include "qom/object.h"
 #include "sysemu/kvm.h"
 
-#define PCI_ANY_ID (~0)
-
 struct VFIOPCIDevice;
 
 typedef struct VFIOIOEventFD {

@@ -25,6 +25,9 @@ extern bool pci_available;
 /* Class, Vendor and Device IDs from Linux's pci_ids.h */
 #include "hw/pci/pci_ids.h"
 
+/* Any PCI Class, Vendor or Device ID */
+#define PCI_ANY_ID (~0)
+
 /* QEMU-specific Vendor and Device ID definitions */
 
 /* IBM (0x1014) */

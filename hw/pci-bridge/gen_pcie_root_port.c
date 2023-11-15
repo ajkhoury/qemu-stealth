@@ -35,6 +35,11 @@ struct GenPCIERootPort {
     PCIESlot parent_obj;
     /*< public >*/
 
+    uint32_t vendor_id;
+    uint32_t device_id;
+    uint32_t sub_vendor_id;
+    uint32_t sub_device_id;
+
     bool migrate_msix;
 
     /* additional resources to reserve */
@@ -85,6 +90,23 @@ static void gen_rp_realize(DeviceState *dev, Error **errp)
     if (local_err) {
         error_propagate(errp, local_err);
         return;
+    }
+
+    /* Set the Device/Vendor IDs */
+    if (grp->vendor_id != PCI_ANY_ID) {
+        rpc->parent_class.vendor_id = grp->vendor_id;
+        pci_config_set_vendor_id(d->config, grp->vendor_id);
+    }
+    if (grp->device_id != PCI_ANY_ID) {
+        rpc->parent_class.device_id = grp->device_id;
+        pci_config_set_device_id(d->config, grp->device_id);
+    }
+    if (grp->sub_vendor_id != PCI_ANY_ID ||
+        grp->sub_device_id != PCI_ANY_ID) {
+        rpc->svid = (grp->sub_vendor_id != PCI_ANY_ID) ?
+                    grp->sub_vendor_id : rpc->parent_class.vendor_id;
+        rpc->ssid = (grp->sub_device_id != PCI_ANY_ID) ?
+                    grp->sub_device_id : rpc->parent_class.device_id;
     }
 
     /*
@@ -145,6 +167,14 @@ static Property gen_rp_props[] = {
                                 speed, PCIE_LINK_SPEED_16),
     DEFINE_PROP_PCIE_LINK_WIDTH("x-width", PCIESlot,
                                 width, PCIE_LINK_WIDTH_32),
+    DEFINE_PROP_UINT32("x-pci-vendor-id", GenPCIERootPort,
+                       vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-device-id", GenPCIERootPort,
+                       device_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-vendor-id", GenPCIERootPort,
+                       sub_vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-device-id", GenPCIERootPort,
+                       sub_device_id, PCI_ANY_ID),
     DEFINE_PROP_END_OF_LIST()
 };
 

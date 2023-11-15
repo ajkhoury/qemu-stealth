@@ -27,6 +27,7 @@
 #include "migration/vmstate.h"
 #include "qemu/module.h"
 
+#include "hw/qdev-properties.h"
 #include "hw/southbridge/ich9.h"
 #include "qom/object.h"
 #include "hw/acpi/acpi_aml_interface.h"
@@ -37,6 +38,11 @@ struct ICH9SMBState {
     PCIDevice dev;
 
     bool irq_enabled;
+
+    uint32_t vendor_id;
+    uint32_t device_id;
+    uint32_t sub_vendor_id;
+    uint32_t sub_device_id;
 
     PMSMBus smb;
 };
@@ -95,6 +101,26 @@ static void ich9_smb_set_irq(PMSMBus *pmsmb, bool enabled)
 static void ich9_smbus_realize(PCIDevice *d, Error **errp)
 {
     ICH9SMBState *s = ICH9_SMB_DEVICE(d);
+    PCIDeviceClass *dc = PCI_DEVICE_GET_CLASS(d);
+
+    /* Set the PCI Device/Vendor IDs */
+    if (s->vendor_id != PCI_ANY_ID) {
+        dc->vendor_id = s->vendor_id;
+        pci_config_set_vendor_id(d->config, dc->vendor_id);
+    }
+    if (s->device_id != PCI_ANY_ID) {
+        dc->device_id = s->device_id;
+        pci_config_set_device_id(d->config, dc->device_id);
+    }
+    if (s->sub_vendor_id != PCI_ANY_ID) {
+        dc->subsystem_vendor_id = s->sub_vendor_id;
+        pci_set_word(d->config + PCI_SUBSYSTEM_VENDOR_ID,
+                     dc->subsystem_vendor_id);
+    }
+    if (s->sub_device_id != PCI_ANY_ID) {
+        dc->subsystem_id = s->sub_device_id;
+        pci_set_word(d->config + PCI_SUBSYSTEM_ID, dc->subsystem_id);
+    }
 
     /* TODO? D31IP.SMIP in chipset configuration space */
     pci_config_set_interrupt_pin(d->config, 0x01); /* interrupt pin 1 */
@@ -118,6 +144,18 @@ static void build_ich9_smb_aml(AcpiDevAmlIf *adev, Aml *scope)
     qbus_build_aml(bus, scope);
 }
 
+static Property ich9_smb_props[] = {
+    DEFINE_PROP_UINT32("x-pci-vendor-id", ICH9SMBState,
+                       vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-device-id", ICH9SMBState,
+                       device_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-vendor-id", ICH9SMBState,
+                       sub_vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-device-id", ICH9SMBState,
+                       sub_device_id, PCI_ANY_ID),
+    DEFINE_PROP_END_OF_LIST()
+};
+
 static void ich9_smb_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
@@ -130,6 +168,8 @@ static void ich9_smb_class_init(ObjectClass *klass, void *data)
     k->class_id = PCI_CLASS_SERIAL_SMBUS;
     dc->vmsd = &vmstate_ich9_smbus;
     dc->desc = "ICH9 SMBUS Bridge";
+    device_class_set_props(dc, ich9_smb_props);
+
     k->realize = ich9_smbus_realize;
     k->config_write = ich9_smbus_write_config;
     /*

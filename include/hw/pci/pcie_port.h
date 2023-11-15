@@ -95,6 +95,7 @@ struct PCIERootPortClass {
     int ssvid_offset;
     int acs_offset;    /* If nonzero, optional ACS capability offset */
     int ssid;
+    int svid;
 };
 
 #endif /* QEMU_PCIE_PORT_H */

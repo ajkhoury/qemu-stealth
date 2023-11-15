@@ -114,6 +114,7 @@ static void ioh3420_class_init(ObjectClass *klass, void *data)
     rpc->aer_offset = IOH_EP_AER_OFFSET;
     rpc->ssvid_offset = IOH_EP_SSVID_OFFSET;
     rpc->ssid = IOH_EP_SSVID_SSID;
+    rpc->svid = PCI_ANY_ID;
 }
 
 static const TypeInfo ioh3420_info = {

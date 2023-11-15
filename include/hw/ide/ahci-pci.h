@@ -16,6 +16,11 @@ OBJECT_DECLARE_SIMPLE_TYPE(AHCIPCIState, ICH9_AHCI)
 struct AHCIPCIState {
     PCIDevice parent_obj;
 
+    uint32_t vendor_id;
+    uint32_t device_id;
+    uint32_t sub_vendor_id;
+    uint32_t sub_device_id;
+
     AHCIState ahci;
 };
 

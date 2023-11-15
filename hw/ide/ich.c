@@ -114,6 +114,27 @@ static void pci_ich9_ahci_realize(PCIDevice *dev, Error **errp)
     int ret;
 
     d->ahci.ports = 6;
+
+    /* Set the PCI Device/Vendor IDs */
+    PCIDeviceClass *dc = PCI_DEVICE_GET_CLASS(d);
+    if (d->vendor_id != PCI_ANY_ID) {
+        dc->vendor_id = d->vendor_id;
+        pci_config_set_vendor_id(dev->config, dc->vendor_id);
+    }
+    if (d->device_id != PCI_ANY_ID) {
+        dc->device_id = d->device_id;
+        pci_config_set_device_id(dev->config, dc->device_id);
+    }
+    if (d->sub_vendor_id != PCI_ANY_ID) {
+        dc->subsystem_vendor_id = d->sub_vendor_id;
+        pci_set_word(dev->config + PCI_SUBSYSTEM_VENDOR_ID,
+                     dc->subsystem_vendor_id);
+    }
+    if (d->sub_device_id != PCI_ANY_ID) {
+        dc->subsystem_id = d->sub_device_id;
+        pci_set_word(dev->config + PCI_SUBSYSTEM_ID, dc->subsystem_id);
+    }
+
     ahci_realize(&d->ahci, DEVICE(dev), pci_get_address_space(dev));
 
     pci_config_set_prog_interface(dev->config, AHCI_PROGMODE_MAJOR_REV_1);
@@ -164,6 +185,18 @@ static void pci_ich9_uninit(PCIDevice *dev)
     qemu_free_irq(d->ahci.irq);
 }
 
+static Property ich_ahci_props[] = {
+    DEFINE_PROP_UINT32("x-pci-vendor-id", AHCIPCIState,
+                       vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-device-id", AHCIPCIState,
+                       device_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-vendor-id", AHCIPCIState,
+                       sub_vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-device-id", AHCIPCIState,
+                       sub_device_id, PCI_ANY_ID),
+    DEFINE_PROP_END_OF_LIST()
+};
+
 static void ich_ahci_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
@@ -177,6 +210,8 @@ static void ich_ahci_class_init(ObjectClass *klass, void *data)
     k->class_id = PCI_CLASS_STORAGE_SATA;
     dc->vmsd = &vmstate_ich9_ahci;
     dc->reset = pci_ich9_reset;
+    device_class_set_props(dc, ich_ahci_props);
+
     set_bit(DEVICE_CATEGORY_STORAGE, dc->categories);
 }
 

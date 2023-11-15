@@ -577,6 +577,26 @@ static void mch_realize(PCIDevice *d, Error **errp)
         return;
     }
 
+    /* Set the override PCI Device/Vendor IDs */
+    PCIDeviceClass *const dc = PCI_DEVICE_GET_CLASS(d);
+    if (mch->vendor_id != PCI_ANY_ID) {
+        dc->vendor_id = mch->vendor_id;
+        pci_config_set_vendor_id(d->config, dc->vendor_id);
+    }
+    if (mch->device_id != PCI_ANY_ID) {
+        dc->device_id = mch->device_id;
+        pci_config_set_device_id(d->config, dc->device_id);
+    }
+    if (mch->sub_vendor_id != PCI_ANY_ID) {
+        dc->subsystem_vendor_id = mch->sub_vendor_id;
+        pci_set_word(d->config + PCI_SUBSYSTEM_VENDOR_ID,
+                     dc->subsystem_vendor_id);
+    }
+    if (mch->sub_device_id != PCI_ANY_ID) {
+        dc->subsystem_id = mch->sub_device_id;
+        pci_set_word(d->config + PCI_SUBSYSTEM_ID, dc->subsystem_id);
+    }
+
     /* setup pci memory mapping */
     pc_pci_as_mapping_init(mch->system_memory, mch->pci_address_space);
 
@@ -676,6 +696,12 @@ static Property mch_props[] = {
     DEFINE_PROP_UINT16("extended-tseg-mbytes", MCHPCIState, ext_tseg_mbytes,
                        16),
     DEFINE_PROP_BOOL("smbase-smram", MCHPCIState, has_smram_at_smbase, true),
+    DEFINE_PROP_UINT32("x-pci-vendor-id", MCHPCIState, vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-device-id", MCHPCIState, device_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-vendor-id", MCHPCIState,
+                       sub_vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-device-id", MCHPCIState,
+                       sub_device_id, PCI_ANY_ID),
     DEFINE_PROP_END_OF_LIST(),
 };
 

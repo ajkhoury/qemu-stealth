@@ -693,9 +693,29 @@ static void ich9_lpc_initfn(Object *obj)
 static void ich9_lpc_realize(PCIDevice *d, Error **errp)
 {
     ICH9LPCState *lpc = ICH9_LPC_DEVICE(d);
+    PCIDeviceClass *dc = PCI_DEVICE_GET_CLASS(d);
     PCIBus *pci_bus = pci_get_bus(d);
     ISABus *isa_bus;
     uint32_t irq;
+
+    /* Set the PCI Device/Vendor IDs */
+    if (lpc->vendor_id != PCI_ANY_ID) {
+        dc->vendor_id = lpc->vendor_id;
+        pci_config_set_vendor_id(d->config, dc->vendor_id);
+    }
+    if (lpc->device_id != PCI_ANY_ID) {
+        dc->device_id = lpc->device_id;
+        pci_config_set_device_id(d->config, dc->device_id);
+    }
+    if (lpc->sub_vendor_id != PCI_ANY_ID) {
+        dc->subsystem_vendor_id = lpc->sub_vendor_id;
+        pci_set_word(d->config + PCI_SUBSYSTEM_VENDOR_ID,
+                     dc->subsystem_vendor_id);
+    }
+    if (lpc->sub_device_id != PCI_ANY_ID) {
+        dc->subsystem_id = lpc->sub_device_id;
+        pci_set_word(d->config + PCI_SUBSYSTEM_ID, dc->subsystem_id);
+    }
 
     if ((lpc->smi_host_features & BIT_ULL(ICH9_LPC_SMI_F_CPU_HOT_UNPLUG_BIT)) &&
         !(lpc->smi_host_features & BIT_ULL(ICH9_LPC_SMI_F_CPU_HOTPLUG_BIT))) {
@@ -826,6 +846,14 @@ static Property ich9_lpc_properties[] = {
                       ICH9_LPC_SMI_F_CPU_HOTPLUG_BIT, true),
     DEFINE_PROP_BIT64("x-smi-cpu-hotunplug", ICH9LPCState, smi_host_features,
                       ICH9_LPC_SMI_F_CPU_HOT_UNPLUG_BIT, true),
+    DEFINE_PROP_UINT32("x-pci-vendor-id", ICH9LPCState,
+                       vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-device-id", ICH9LPCState,
+                       device_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-vendor-id", ICH9LPCState,
+                       sub_vendor_id, PCI_ANY_ID),
+    DEFINE_PROP_UINT32("x-pci-sub-device-id", ICH9LPCState,
+                       sub_device_id, PCI_ANY_ID),
     DEFINE_PROP_END_OF_LIST(),
 };
 

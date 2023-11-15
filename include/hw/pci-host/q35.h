@@ -56,6 +56,11 @@ struct MCHPCIState {
     uint64_t above_4g_mem_size;
     uint64_t pci_hole64_size;
     uint16_t ext_tseg_mbytes;
+
+    uint32_t vendor_id;
+    uint32_t device_id;
+    uint32_t sub_vendor_id;
+    uint32_t sub_device_id;
 };
 
 struct Q35PCIHost {
