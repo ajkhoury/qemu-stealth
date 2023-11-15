@@ -41,6 +41,11 @@ typedef struct XHCIPciState {
     OnOffAuto msi;
     OnOffAuto msix;
     bool conditional_intr_mapping;
+
+    uint32_t vendor_id;
+    uint32_t device_id;
+    uint32_t sub_vendor_id;
+    uint32_t sub_device_id;
 } XHCIPciState;
 
 #endif
