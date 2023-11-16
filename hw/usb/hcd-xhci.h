@@ -183,6 +183,7 @@ typedef struct XHCIState {
     MemoryRegion mem_oper;
     MemoryRegion mem_runtime;
     MemoryRegion mem_doorbell;
+    MemoryRegion mem_vendor;
 
     /* properties */
     uint32_t numports_2;
@@ -223,6 +224,7 @@ typedef struct XHCIState {
     XHCIRing cmd_ring;
 
     bool nec_quirks;
+    bool intel_quirks;
 } XHCIState;
 
 extern const VMStateDescription vmstate_xhci;
