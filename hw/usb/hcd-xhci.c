@@ -65,6 +65,18 @@
 # error Increase XHCI_LEN_REGS
 #endif
 
+/* Intel specific xHCI registers */
+#define INTEL_XHCI_REGS_OFF 0x8000
+#define INTEL_XHCI_REGS_LEN 0x8000
+
+/* must be power of 2 */
+#define INTEL_XHCI_LEN_REGS (INTEL_XHCI_REGS_OFF + INTEL_XHCI_REGS_LEN)
+#if INTEL_XHCI_LEN_REGS & (INTEL_XHCI_LEN_REGS - 1)
+#error INTEL_XHCI_LEN_REGS is not a power of two!
+#endif
+
+#define INTEL_XHCI_PMCTRL_REG 0x80A4
+
 /* bit definitions */
 #define USBCMD_RS       (1<<0)
 #define USBCMD_HCRST    (1<<1)
@@ -3219,6 +3231,37 @@ static const MemoryRegionOps xhci_doorbell_ops = {
     .endianness = DEVICE_LITTLE_ENDIAN,
 };
 
+static uint64_t xhci_intel_read(void *ptr, hwaddr reg, unsigned size)
+{
+    uint32_t ret;
+
+    switch (reg + INTEL_XHCI_REGS_OFF) {
+    case INTEL_XHCI_PMCTRL_REG:
+        ret = 0x002DFF90; /* default PMCTRL_REG value */
+        break;
+    default:
+        trace_usb_xhci_unimplemented("intel cap read", reg + INTEL_XHCI_REGS_OFF);
+        ret = 0;
+    }
+
+    trace_usb_xhci_cap_read(reg + INTEL_XHCI_REGS_OFF, ret);
+    return ret;
+}
+
+static void xhci_intel_write(void *opaque, hwaddr addr, uint64_t val,
+                             unsigned width)
+{
+    /* nothing */
+}
+
+static const MemoryRegionOps xhci_intel_ops = {
+    .read = xhci_intel_read,
+    .write = xhci_intel_write,
+    .valid.min_access_size = 4,
+    .valid.max_access_size = 4,
+    .endianness = DEVICE_LITTLE_ENDIAN,
+};
+
 static void xhci_attach(USBPort *usbport)
 {
     XHCIState *xhci = usbport->opaque;
@@ -3414,7 +3457,8 @@ static void usb_xhci_realize(DeviceState *dev, Error **errp)
     usb_xhci_init(xhci);
     xhci->mfwrap_timer = timer_new_ns(QEMU_CLOCK_VIRTUAL, xhci_mfwrap_timer, xhci);
 
-    memory_region_init(&xhci->mem, OBJECT(dev), "xhci", XHCI_LEN_REGS);
+    memory_region_init(&xhci->mem, OBJECT(dev), "xhci",
+                    xhci->intel_quirks ? INTEL_XHCI_LEN_REGS : XHCI_LEN_REGS);
     memory_region_init_io(&xhci->mem_cap, OBJECT(dev), &xhci_cap_ops, xhci,
                           "capabilities", LEN_CAP);
     memory_region_init_io(&xhci->mem_oper, OBJECT(dev), &xhci_oper_ops, xhci,
@@ -3428,6 +3472,13 @@ static void usb_xhci_realize(DeviceState *dev, Error **errp)
     memory_region_add_subregion(&xhci->mem, OFF_OPER,     &xhci->mem_oper);
     memory_region_add_subregion(&xhci->mem, OFF_RUNTIME,  &xhci->mem_runtime);
     memory_region_add_subregion(&xhci->mem, OFF_DOORBELL, &xhci->mem_doorbell);
+
+    if (xhci->intel_quirks) {
+        memory_region_init_io(&xhci->mem_vendor, OBJECT(dev), &xhci_intel_ops,
+                               xhci, "intel", INTEL_XHCI_REGS_LEN);
+        memory_region_add_subregion(&xhci->mem, INTEL_XHCI_REGS_OFF,
+                                    &xhci->mem_vendor);
+    }
 
     for (i = 0; i < xhci->numports; i++) {
         XHCIPort *port = &xhci->ports[i];

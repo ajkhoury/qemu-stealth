@@ -113,6 +113,9 @@ static void usb_xhci_pci_realize(struct PCIDevice *dev, Error **errp)
     /* Set the PCI Device/Vendor IDs */
     PCIDeviceClass *dc = PCI_DEVICE_GET_CLASS(dev);
     if (s->vendor_id != PCI_ANY_ID) {
+        if (s->vendor_id == PCI_VENDOR_ID_INTEL) {
+            s->xhci.intel_quirks = true;
+        }
         dc->vendor_id = s->vendor_id;
         pci_config_set_vendor_id(dev->config, dc->vendor_id);
     }
