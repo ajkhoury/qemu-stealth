@@ -1759,12 +1759,14 @@ build_dsdt(GArray *table_data, BIOSLinker *linker,
     aml_append(scope, aml_name_decl("_S5", pkg));
     aml_append(dsdt, scope);
 
+#if 0
     /* create fw_cfg node, unconditionally */
     {
         scope = aml_scope("\\_SB.PCI0");
         fw_cfg_add_acpi_dsdt(scope, x86ms->fw_cfg);
         aml_append(dsdt, scope);
     }
+#endif
 
     sb_scope = aml_scope("\\_SB");
     {

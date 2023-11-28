@@ -26,6 +26,8 @@ FWCfgState *fw_cfg_arch_create(MachineState *ms,
 void fw_cfg_build_smbios(PCMachineState *pcms, FWCfgState *fw_cfg,
                          SmbiosEntryPointType ep_type);
 void fw_cfg_build_feature_control(MachineState *ms, FWCfgState *fw_cfg);
+#if 0
 void fw_cfg_add_acpi_dsdt(Aml *scope, FWCfgState *fw_cfg);
+#endif
 
 #endif
