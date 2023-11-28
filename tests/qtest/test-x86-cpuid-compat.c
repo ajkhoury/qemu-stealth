@@ -256,6 +256,11 @@ static const CpuidTestArgs cpuid_tests[] = {
         "x86/cpuid/auto-level/486/arat",
         "486", "arat=on", NULL, "level", 6,
     },
+    /* CPUID[6].ECX: */
+    {
+        "x86/cpuid/auto-level/486/aperfmperf",
+        "486", "aperfmperf=on", NULL, "level", 6,
+    },
     /* CPUID[EAX=7,ECX=0].EBX: */
     {
         "x86/cpuid/auto-level/phenom/fsgsbase",
@@ -372,6 +377,11 @@ static const FeatureTestArgs feature_tests[] = {
         6, 0, "EAX", 2, true,
     },
     {
+        "x86/cpuid/features/plus",
+        "486", "+aperfmperf",
+        6, 0, "ECX", 0, true,
+    },
+    {
         "x86/cpuid/features/minus",
         "pentium", "-mmx",
         1, 0, "EDX", 23, false,
@@ -380,6 +390,11 @@ static const FeatureTestArgs feature_tests[] = {
         "x86/cpuid/features/on",
         "486", "arat=on",
         6, 0, "EAX", 2, true,
+    },
+    {
+        "x86/cpuid/features/on",
+        "486", "aperfmperf=on",
+        6, 0, "ECX", 0, true,
     },
     {
         "x86/cpuid/features/off",
