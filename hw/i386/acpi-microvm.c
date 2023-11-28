@@ -119,7 +119,9 @@ build_dsdt_microvm(GArray *table_data, BIOSLinker *linker,
     dsdt = init_aml_allocator();
 
     sb_scope = aml_scope("_SB");
+#if 0
     fw_cfg_add_acpi_dsdt(sb_scope, x86ms->fw_cfg);
+#endif
     qbus_build_aml(BUS(isabus), sb_scope);
     build_ged_aml(sb_scope, GED_DEVICE, x86ms->acpi_dev,
                   GED_MMIO_IRQ, AML_SYSTEM_MEMORY, GED_MMIO_BASE);
