@@ -3375,6 +3375,7 @@ static int kvm_put_msrs(X86CPU *cpu, int level)
      */
     if (level >= KVM_PUT_RESET_STATE) {
         kvm_msr_entry_add(cpu, MSR_IA32_TSC, env->tsc);
+#if 0
         kvm_msr_entry_add(cpu, MSR_KVM_SYSTEM_TIME, env->system_time_msr);
         kvm_msr_entry_add(cpu, MSR_KVM_WALL_CLOCK, env->wall_clock_msr);
         if (env->features[FEAT_KVM] & (1 << KVM_FEATURE_ASYNC_PF_INT)) {
@@ -3393,7 +3394,7 @@ static int kvm_put_msrs(X86CPU *cpu, int level)
         if (env->features[FEAT_KVM] & (1 << KVM_FEATURE_POLL_CONTROL)) {
             kvm_msr_entry_add(cpu, MSR_KVM_POLL_CONTROL, env->poll_control_msr);
         }
-
+#endif
         if (has_architectural_pmu_version > 0) {
             if (has_architectural_pmu_version > 1) {
                 /* Stop the counter.  */
@@ -3840,6 +3841,7 @@ static int kvm_get_msrs(X86CPU *cpu)
         kvm_msr_entry_add(cpu, MSR_LSTAR, 0);
     }
 #endif
+#if 0
     kvm_msr_entry_add(cpu, MSR_KVM_SYSTEM_TIME, 0);
     kvm_msr_entry_add(cpu, MSR_KVM_WALL_CLOCK, 0);
     if (env->features[FEAT_KVM] & (1 << KVM_FEATURE_ASYNC_PF_INT)) {
@@ -3857,6 +3859,7 @@ static int kvm_get_msrs(X86CPU *cpu)
     if (env->features[FEAT_KVM] & (1 << KVM_FEATURE_POLL_CONTROL)) {
         kvm_msr_entry_add(cpu, MSR_KVM_POLL_CONTROL, 1);
     }
+#endif
     if (has_architectural_pmu_version > 0) {
         if (has_architectural_pmu_version > 1) {
             kvm_msr_entry_add(cpu, MSR_CORE_PERF_FIXED_CTR_CTRL, 0);
@@ -4075,12 +4078,14 @@ static int kvm_get_msrs(X86CPU *cpu)
         case MSR_VM_HSAVE_PA:
             env->vm_hsave = msrs[i].data;
             break;
+#if 0
         case MSR_KVM_SYSTEM_TIME:
             env->system_time_msr = msrs[i].data;
             break;
         case MSR_KVM_WALL_CLOCK:
             env->wall_clock_msr = msrs[i].data;
             break;
+#endif
         case MSR_MCG_STATUS:
             env->mcg_status = msrs[i].data;
             break;
@@ -4120,6 +4125,7 @@ static int kvm_get_msrs(X86CPU *cpu)
                 env->mce_banks[msrs[i].index - MSR_MC0_CTL] = msrs[i].data;
             }
             break;
+#if 0
         case MSR_KVM_ASYNC_PF_EN:
             env->async_pf_en_msr = msrs[i].data;
             break;
@@ -4136,6 +4142,7 @@ static int kvm_get_msrs(X86CPU *cpu)
             env->poll_control_msr = msrs[i].data;
             break;
         }
+#endif
         case MSR_CORE_PERF_FIXED_CTR_CTRL:
             env->msr_fixed_ctr_ctrl = msrs[i].data;
             break;
