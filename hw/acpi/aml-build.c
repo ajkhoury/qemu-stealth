@@ -2261,7 +2261,7 @@ void build_fadt(GArray *tbl, BIOSLinker *linker, const AcpiFadtData *f,
     }
 
     /* Hypervisor Vendor Identity */
-    build_append_padded_str(tbl, "QEMU", 8, '\0');
+    build_append_padded_str(tbl, "\0", 8, '\0');
 
     /* TODO: extra fields need to be added to support revisions above rev6 */
     assert(f->rev == 6);
