@@ -9650,6 +9650,14 @@ static void nvme_realize(PCIDevice *pci_dev, Error **errp)
         object_ref(OBJECT(pn->subsys));
     }
 
+#ifdef QEMU_NVME_SERIAL
+    if (!n->params.serial || !n->params.serial[0]) {
+        if (n->params.serial)
+            free(n->params.serial);
+        n->params.serial = g_strdup(QEMU_NVME_SERIAL);
+    }
+#endif
+
     if (!nvme_check_params(n, errp)) {
         return;
     }
