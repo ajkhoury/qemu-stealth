@@ -15,6 +15,22 @@
 #include "qapi/qapi-types-block-core.h"
 #include "hw/qdev-properties-system.h"
 
+#define QEMU_HARDDISK_VENDOR    "Samsung"
+#define QEMU_HARDDISK_MODEL     "Samsung SSD 870 QVO"
+#define QEMU_HARDDISK_PRODUCT   "Samsung SSD 870 QVO"
+#define QEMU_HARDDISK_SERIAL    "S5VYNG0NB%05dW"
+
+#define QEMU_NVME_MODEL         "Samsung SSD 960 EVO"
+#define QEMU_NVME_FIRMWARE      "3B7QCXE7"
+//#define QEMU_NVME_SERIAL        "0000_0000_0000_0000"
+
+#define QEMU_CDROM_VENDOR       "DELL    "
+#define QEMU_CDROM_MODEL        "HL-DT-ST DVD+/-RW GH50N"
+#define QEMU_CDROM_SIGNATURE    "GH50N DVD-RW    "
+
+#define QEMU_MICRODRIVE_MODEL   "DCSM-11000"
+
+
 /* Configuration */
 
 typedef struct BlockConf {
