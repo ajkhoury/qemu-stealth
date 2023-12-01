@@ -2626,21 +2626,26 @@ int ide_init_drive(IDEState *s, IDEDevice *dev, IDEDriveKind kind, Error **errp)
     if (dev->serial) {
         pstrcpy(s->drive_serial_str, sizeof(s->drive_serial_str), dev->serial);
     } else {
+#ifdef QEMU_HARDDISK_SERIAL
+        snprintf(s->drive_serial_str, sizeof(s->drive_serial_str),
+                 QEMU_HARDDISK_SERIAL, s->drive_serial);
+#else
         snprintf(s->drive_serial_str, sizeof(s->drive_serial_str),
                  "QM%05d", s->drive_serial);
+#endif
     }
     if (dev->model) {
         pstrcpy(s->drive_model_str, sizeof(s->drive_model_str), dev->model);
     } else {
         switch (kind) {
         case IDE_CD:
-            strcpy(s->drive_model_str, "QEMU DVD-ROM");
+            strcpy(s->drive_model_str, QEMU_CDROM_MODEL);
             break;
         case IDE_CFATA:
-            strcpy(s->drive_model_str, "QEMU MICRODRIVE");
+            strcpy(s->drive_model_str, QEMU_MICRODRIVE_MODEL);
             break;
         default:
-            strcpy(s->drive_model_str, "QEMU HARDDISK");
+            strcpy(s->drive_model_str, QEMU_HARDDISK_MODEL);
             break;
         }
     }

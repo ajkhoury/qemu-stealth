@@ -8195,8 +8195,8 @@ static void nvme_init_ctrl(NvmeCtrl *n, PCIDevice *pci_dev)
 
     id->vid = cpu_to_le16(pci_get_word(pci_conf + PCI_VENDOR_ID));
     id->ssvid = cpu_to_le16(pci_get_word(pci_conf + PCI_SUBSYSTEM_VENDOR_ID));
-    strpadcpy((char *)id->mn, sizeof(id->mn), "QEMU NVMe Ctrl", ' ');
-    strpadcpy((char *)id->fr, sizeof(id->fr), QEMU_VERSION, ' ');
+    strpadcpy((char *)id->mn, sizeof(id->mn), QEMU_NVME_MODEL, ' ');
+    strpadcpy((char *)id->fr, sizeof(id->fr), QEMU_NVME_FIRMWARE, ' ');
     strpadcpy((char *)id->sn, sizeof(id->sn), n->params.serial, ' ');
 
     id->cntlid = cpu_to_le16(n->cntlid);
@@ -8351,6 +8351,14 @@ static void nvme_realize(PCIDevice *pci_dev, Error **errp)
         n->params.serial = g_strdup(pn->params.serial);
         n->subsys = pn->subsys;
     }
+
+#ifdef QEMU_NVME_SERIAL
+    if (!n->params.serial || !n->params.serial[0]) {
+        if (n->params.serial)
+            free(n->params.serial);
+        n->params.serial = g_strdup(QEMU_NVME_SERIAL);
+    }
+#endif
 
     if (!nvme_check_params(n, errp)) {
         return;
