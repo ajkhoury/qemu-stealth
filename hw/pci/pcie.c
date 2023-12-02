@@ -207,10 +207,16 @@ int pcie_cap_init(PCIDevice *dev, uint8_t offset,
     pcie_cap_fill_slot_lnk(dev);
 
     /* Filling v2 specific values */
+#ifndef DEBUG_PCIE
+    (void)(exp_cap);
+#else
     pci_set_long(exp_cap + PCI_EXP_DEVCAP2,
                  PCI_EXP_DEVCAP2_EFF | PCI_EXP_DEVCAP2_EETLPP);
+#endif
 
+#ifdef DEBUG_PCIE
     pci_set_word(dev->wmask + pos + PCI_EXP_DEVCTL2, PCI_EXP_DEVCTL2_EETLPPB);
+#endif
 
     if (dev->cap_present & QEMU_PCIE_EXTCAP_INIT) {
         /* read-only to behave like a 'NULL' Extended Capability Header */
