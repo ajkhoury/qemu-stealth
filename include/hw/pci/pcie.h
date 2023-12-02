@@ -125,6 +125,12 @@ void pcie_cap_arifwd_init(PCIDevice *dev);
 void pcie_cap_arifwd_reset(PCIDevice *dev);
 bool pcie_cap_is_arifwd_enabled(const PCIDevice *dev);
 
+/* Completion Timeout support */
+void pcie_cap_completion_timeout_init(PCIDevice *dev);
+
+/*  Latency Tolerance Reporting (LTR) */
+void pcie_cap_ltr_init(PCIDevice *dev);
+
 /* PCI express extended capability helper functions */
 uint16_t pcie_find_capability(PCIDevice *dev, uint16_t cap_id);
 void pcie_add_capability(PCIDevice *dev,

@@ -969,6 +969,28 @@ bool pcie_cap_is_arifwd_enabled(const PCIDevice *dev)
         PCI_EXP_DEVCTL2_ARI;
 }
 
+/* Completion Timeout Support
+ * Device function support for the optional Completion Timeout mechanism.
+ */
+void pcie_cap_completion_timeout_init(PCIDevice *dev)
+{
+    uint32_t pos = dev->exp.exp_cap;
+    pci_long_test_and_set_mask(dev->config + pos + PCI_EXP_DEVCAP2,
+                               PCI_EXP_DEVCAP2_COMP_TMOUT_DIS);
+    pci_long_test_and_set_mask(dev->config + pos + PCI_EXP_DEVCAP2,
+                               0x7 /* Range ABC */); 
+}
+
+/* Latency Tolerance Reporting (LTR) */
+void pcie_cap_ltr_init(PCIDevice *dev)
+{
+    uint32_t pos = dev->exp.exp_cap;
+    pci_long_test_and_set_mask(dev->config + pos + PCI_EXP_DEVCAP2,
+                               PCI_EXP_DEVCAP2_LTR);
+    pci_long_test_and_set_mask(dev->config + pos + PCI_EXP_DEVCTL2,
+                               PCI_EXP_DEVCTL2_LTR_EN);
+}
+
 /**************************************************************************
  * pci express extended capability list management functions
  * uint16_t ext_cap_id (16 bit)

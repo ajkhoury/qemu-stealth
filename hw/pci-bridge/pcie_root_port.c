@@ -98,6 +98,9 @@ static void rp_realize(PCIDevice *d, Error **errp)
         goto err_int;
     }
 
+    pcie_cap_completion_timeout_init(d);
+    pcie_cap_ltr_init(d);
+
     pcie_cap_arifwd_init(d);
     pcie_cap_deverr_init(d);
     pcie_cap_slot_init(d, s);
