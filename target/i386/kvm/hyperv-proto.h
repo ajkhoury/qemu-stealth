@@ -44,6 +44,7 @@
 /*
  * HV_CPUID_FEATURES.EBX bits
  */
+#define HV_CREATE_PARTITIONS         (1u << 0)
 #define HV_POST_MESSAGES             (1u << 4)
 #define HV_SIGNAL_EVENTS             (1u << 5)
 
