@@ -1494,6 +1494,8 @@ static int hyperv_fill_cpuids(CPUState *cs,
     /* Unconditionally required with any Hyper-V enlightenment */
     c->eax |= HV_HYPERCALL_AVAILABLE;
 
+    c->ebx |= HV_CREATE_PARTITIONS;
+
     /* SynIC and Vmbus devices require messages/signals hypercalls */
     if (hyperv_feat_enabled(cpu, HYPERV_FEAT_SYNIC) &&
         !cpu->hyperv_synic_kvm_only) {
