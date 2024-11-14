@@ -304,12 +304,12 @@ int main(int argc, char **argv)
 
     /* If level is already large enough, it shouldn't change: */
     add_cpuid_test("x86/cpuid/auto-level/SandyBridge/multiple",
-                   "SandyBridge", "arat=on,fsgsbase=on,avx512vbmi=on",
+                   "SandyBridge", "dts=on,arat=on,fsgsbase=on,avx512vbmi=on",
                    NULL, "level", 0xd);
     /* If level is explicitly set, it shouldn't change: */
     add_cpuid_test("x86/cpuid/auto-level/486/fixed/0xF",
                    "486",
-                   "level=0xF,arat=on,fsgsbase=on,avx512vbmi=on,xsaveopt=on",
+                   "level=0xF,dts=on,arat=on,fsgsbase=on,avx512vbmi=on,xsaveopt=on",
                    NULL, "level", 0xF);
     add_cpuid_test("x86/cpuid/auto-level/486/fixed/2",
                    "486",

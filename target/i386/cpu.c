@@ -1027,7 +1027,7 @@ void x86_cpu_vendor_words2str(char *dst, uint32_t vendor1,
 #define TCG_7_1_EDX_FEATURES 0
 #define TCG_7_2_EDX_FEATURES 0
 #define TCG_APM_FEATURES 0
-#define TCG_6_EAX_FEATURES CPUID_6_EAX_ARAT
+#define TCG_6_EAX_FEATURES (CPUID_6_EAX_ARAT | CPUID_6_EAX_DTS)
 #define TCG_6_ECX_FEATURES CPUID_6_ECX_APERFMPERF
 #define TCG_XSAVE_FEATURES (CPUID_XSAVE_XSAVEOPT | CPUID_XSAVE_XGETBV1)
           /* missing:
@@ -1482,7 +1482,7 @@ FeatureWordInfo feature_word_info[FEATURE_WORDS] = {
     [FEAT_6_EAX] = {
         .type = CPUID_FEATURE_WORD,
         .feat_names = {
-            NULL, NULL, "arat", NULL,
+            "dts", NULL, "arat", NULL,
             NULL, NULL, NULL, NULL,
             NULL, NULL, NULL, NULL,
             NULL, NULL, NULL, NULL,

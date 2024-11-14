@@ -1134,6 +1134,7 @@ uint64_t x86_cpu_get_supported_feature_word(X86CPU *cpu, FeatureWord w);
 #define CPUID_XSAVE_XSAVES     (1U << 3)
 #define CPUID_XSAVE_XFD        (1U << 4)
 
+#define CPUID_6_EAX_DTS        (1U << 0)
 #define CPUID_6_EAX_ARAT       (1U << 2)
 #define CPUID_6_ECX_APERFMPERF (1U << 0)
 
