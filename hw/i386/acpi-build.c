@@ -151,6 +151,7 @@ static void init_common_fadt_data(MachineState *ms, Object *o,
     AmlAddressSpace as = AML_AS_SYSTEM_IO;
     AcpiFadtData fadt = {
         .rev = 3,
+        .pm_profile = x86ms->pm_profile,
         .flags =
             (1 << ACPI_FADT_F_WBINVD) |
             (1 << ACPI_FADT_F_PROC_C1) |

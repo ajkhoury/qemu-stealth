@@ -1556,6 +1556,7 @@ static void virt_machine_instance_init(Object *obj)
     s->oem_id = g_strndup(ACPI_BUILD_APPNAME6, 6);
     s->oem_table_id = g_strndup(ACPI_BUILD_APPNAME8, 8);
     s->creator_id = g_strndup(ACPI_BUILD_APPNAME8, 4);
+    s->pm_profile = 0; /* Unspecified */
     s->acpi = ON_OFF_AUTO_AUTO;
     s->iommu_sys = ON_OFF_AUTO_AUTO;
     s->num_sources = VIRT_IRQCHIP_NUM_SOURCES;
@@ -1651,6 +1652,23 @@ static void virt_set_iommu_sys(Object *obj, Visitor *v, const char *name,
     RISCVVirtState *s = RISCV_VIRT_MACHINE(obj);
 
     visit_type_OnOffAuto(v, name, &s->iommu_sys, errp);
+}
+
+static void virt_get_pm_profile(Object *obj, Visitor *v, const char *name,
+                                void *opaque, Error **errp)
+{
+    RISCVVirtState *s = RISCV_VIRT_MACHINE(obj);
+    uint8_t pm_profile = s->pm_profile;
+
+    visit_type_uint8(v, name, &pm_profile, errp);
+}
+
+static void virt_set_pm_profile(Object *obj, Visitor *v, const char *name,
+                                void *opaque, Error **errp)
+{
+    RISCVVirtState *s = RISCV_VIRT_MACHINE(obj);
+
+    visit_type_uint8(v, name, &s->pm_profile, errp);
 }
 
 bool virt_is_acpi_enabled(RISCVVirtState *s)
@@ -1781,6 +1799,13 @@ static void virt_machine_class_init(ObjectClass *oc, const void *data)
                               NULL, NULL);
     object_class_property_set_description(oc, "iommu-sys",
                                           "Enable IOMMU platform device");
+
+    object_class_property_add(oc, "x-pm-profile", "uint8_t",
+                              virt_get_pm_profile, virt_set_pm_profile,
+                              NULL, NULL);
+    object_class_property_set_description(oc, "x-pm-profile",
+                                          "Set the Preferred_PM_Profile FADT field to convey "
+                                          "the preferred power management profile to OSPM");
 }
 
 static const TypeInfo virt_machine_typeinfo = {

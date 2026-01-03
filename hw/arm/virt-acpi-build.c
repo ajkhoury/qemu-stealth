@@ -1134,6 +1134,7 @@ static void build_fadt_rev6(GArray *table_data, BIOSLinker *linker,
     /* ACPI v6.3 */
     AcpiFadtData fadt = {
         .rev = 6,
+        .pm_profile = vms->pm_profile,
         .minor_ver = 3,
         .flags = 1 << ACPI_FADT_F_HW_REDUCED_ACPI,
         .xdsdt_tbl_offset = &dsdt_tbl_offset,

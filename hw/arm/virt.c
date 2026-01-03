@@ -3581,6 +3581,23 @@ static void virt_set_creator_id(Object *obj, const char *value,
     strncpy(vms->creator_id, value, 4);
 }
 
+static void virt_get_pm_profile(Object *obj, Visitor *v,
+                                const char *name, void *opaque, Error **errp)
+{
+    VirtMachineState *vms = VIRT_MACHINE(obj);
+    uint8_t pm_profile = vms->pm_profile;
+
+    visit_type_uint8(v, name, &pm_profile, errp);
+}
+
+static void virt_set_pm_profile(Object *obj, Visitor *v,
+                                const char *name, void *opaque, Error **errp)
+{
+    VirtMachineState *vms = VIRT_MACHINE(obj);
+
+    visit_type_uint8(v, name, &vms->pm_profile, errp);
+}
+
 
 bool virt_is_acpi_enabled(const VirtMachineState *vms)
 {
@@ -4376,6 +4393,13 @@ static void virt_machine_class_init(ObjectClass *oc, const void *data)
                                           "in the ACPI table header."
                                           "The string may be up to 4 bytes in size");
 
+    object_class_property_add(oc, "x-pm-profile", "uint8_t",
+                                virt_get_pm_profile,
+                                virt_set_pm_profile,
+                                NULL, NULL);
+    object_class_property_set_description(oc, "x-pm-profile",
+                                          "Set the Preferred_PM_Profile FADT field to convey "
+                                          "the preferred power management profile to OSPM");
 }
 
 static void virt_instance_init(Object *obj)
@@ -4430,6 +4454,7 @@ static void virt_instance_init(Object *obj)
     vms->oem_id = g_strndup(ACPI_BUILD_APPNAME6, 6);
     vms->oem_table_id = g_strndup(ACPI_BUILD_APPNAME8, 8);
     vms->creator_id = g_strndup(ACPI_BUILD_APPNAME8, 4);
+    vms->pm_profile = 0; /* Unspecified */
     cxl_machine_init(obj, &vms->cxl_devices_state);
 
     vms->smmuv3_devices = g_ptr_array_new_with_free_func(NULL);

@@ -2497,7 +2497,7 @@ void build_fadt(GArray *tbl, BIOSLinker *linker, const AcpiFadtData *f,
     /* ACPI1.0: INT_MODEL, ACPI2.0+: Reserved */
     build_append_int_noprefix(tbl, f->int_model /* Multiple APIC */, 1);
     /* Preferred_PM_Profile */
-    build_append_int_noprefix(tbl, 0 /* Unspecified */, 1);
+    build_append_int_noprefix(tbl, f->pm_profile /* Desktop */, 1);
     build_append_int_noprefix(tbl, f->sci_int, 2); /* SCI_INT */
     build_append_int_noprefix(tbl, f->smi_cmd, 4); /* SMI_CMD */
     build_append_int_noprefix(tbl, f->acpi_enable_cmd, 1); /* ACPI_ENABLE */

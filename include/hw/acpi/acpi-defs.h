@@ -67,6 +67,7 @@ typedef struct AcpiFadtData {
     struct AcpiGenericAddress sleep_sts; /* SLEEP_STATUS_REG */
     uint8_t reset_val;         /* RESET_VALUE */
     uint8_t  rev;              /* Revision */
+    uint8_t  pm_profile;       /* Preferred_PM_Profile */
     uint32_t flags;            /* Flags */
     uint32_t smi_cmd;          /* SMI_CMD */
     uint16_t sci_int;          /* SCI_INT */

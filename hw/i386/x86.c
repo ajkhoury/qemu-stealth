@@ -332,6 +332,23 @@ static void x86_machine_set_creator_id(Object *obj, const char *value,
     strncpy(x86ms->creator_id, value, 4);
 }
 
+static void x86_machine_get_pm_profile(Object *obj, Visitor *v,
+                                const char *name, void *opaque, Error **errp)
+{
+    X86MachineState *x86ms = X86_MACHINE(obj);
+    uint8_t pm_profile = x86ms->pm_profile;
+
+    visit_type_uint8(v, name, &pm_profile, errp);
+}
+
+static void x86_machine_set_pm_profile(Object *obj, Visitor *v,
+                                const char *name, void *opaque, Error **errp)
+{
+    X86MachineState *x86ms = X86_MACHINE(obj);
+
+    visit_type_uint8(v, name, &x86ms->pm_profile, errp);
+}
+
 static void x86_machine_get_bus_lock_ratelimit(Object *obj, Visitor *v,
                                 const char *name, void *opaque, Error **errp)
 {
@@ -392,6 +409,7 @@ static void x86_machine_initfn(Object *obj)
     x86ms->oem_id = g_strndup(ACPI_BUILD_APPNAME6, 6);
     x86ms->oem_table_id = g_strndup(ACPI_BUILD_APPNAME8, 8);
     x86ms->creator_id = g_strndup(ACPI_BUILD_APPNAME8, 4);
+    x86ms->pm_profile = 0; /* Unspecified */
     x86ms->bus_lock_ratelimit = 0;
     x86ms->above_4g_mem_start = 4 * GiB;
 }
@@ -465,6 +483,13 @@ static void x86_machine_class_init(ObjectClass *oc, const void *data)
                                           "Override the default value of the Creator ID "
                                           "(ASL compiler ID) field in the ACPI table header."
                                           "The string may be up to 4 bytes in size");
+
+    object_class_property_add(oc, X86_MACHINE_PM_PROFILE, "uint8_t",
+                                x86_machine_get_pm_profile,
+                                x86_machine_set_pm_profile, NULL, NULL);
+    object_class_property_set_description(oc, X86_MACHINE_PM_PROFILE,
+                                          "Set the Preferred_PM_Profile FADT field to convey "
+                                          "the preferred power management profile to OSPM");
 
     object_class_property_add(oc, X86_MACHINE_BUS_LOCK_RATELIMIT, "uint64_t",
                                 x86_machine_get_bus_lock_ratelimit,

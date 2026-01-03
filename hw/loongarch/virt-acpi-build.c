@@ -509,6 +509,7 @@ static void acpi_build(AcpiBuildTables *tables, MachineState *machine)
     GArray *tables_blob = tables->table_data;
 
     init_common_fadt_data(&fadt_data);
+    fadt_data.pm_profile = lvms->pm_profile;
 
     table_offsets = g_array_new(false, true, sizeof(uint32_t));
     ACPI_BUILD_DPRINTF("init ACPI tables\n");

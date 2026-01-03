@@ -1104,6 +1104,23 @@ static void virt_set_creator_id(Object *obj, const char *value, Error **errp)
     strncpy(lvms->creator_id, value, 4);
 }
 
+static void virt_get_pm_profile(Object *obj, Visitor *v,
+                                const char *name, void *opaque, Error **errp)
+{
+    LoongArchVirtMachineState *lvms = LOONGARCH_VIRT_MACHINE(obj);
+    uint8_t pm_profile = lvms->pm_profile;
+
+    visit_type_uint8(v, name, &pm_profile, errp);
+}
+
+static void virt_set_pm_profile(Object *obj, Visitor *v,
+                                const char *name, void *opaque, Error **errp)
+{
+    LoongArchVirtMachineState *lvms = LOONGARCH_VIRT_MACHINE(obj);
+
+    visit_type_uint8(v, name, &lvms->pm_profile, errp);
+}
+
 static void virt_initfn(Object *obj)
 {
     LoongArchVirtMachineState *lvms = LOONGARCH_VIRT_MACHINE(obj);
@@ -1117,6 +1134,7 @@ static void virt_initfn(Object *obj)
     lvms->oem_id = g_strndup(ACPI_BUILD_APPNAME6, 6);
     lvms->oem_table_id = g_strndup(ACPI_BUILD_APPNAME8, 8);
     lvms->creator_id = g_strndup(ACPI_BUILD_APPNAME8, 4);
+    lvms->pm_profile = 0; /* Unspecified */
     virt_flash_create(lvms);
 }
 
@@ -1562,6 +1580,14 @@ static void virt_class_init(ObjectClass *oc, const void *data)
                                           "Override the default value of the Creator ID field "
                                           "in the ACPI table header."
                                           "The string may be up to 4 bytes in size");
+
+
+    object_class_property_add(oc, "x-pm-profile", "uint8_t",
+                                virt_get_pm_profile,
+                                virt_set_pm_profile, NULL, NULL);
+    object_class_property_set_description(oc, "x-pm-profile",
+                                          "Set the Preferred_PM_Profile FADT field to convey "
+                                          "the preferred power management profile to OSPM");
 }
 
 #define DEFINE_VIRT_MACHINE_VERSION(latest, ...) \
