@@ -468,11 +468,15 @@ uint32_t kvm_arch_get_supported_cpuid(KVMState *s, uint32_t function,
         ret |= CPUID_MTRR | CPUID_PAT | CPUID_MCE | CPUID_MCA;
         /* KVM never reports CPUID_HT but QEMU can support when vcpus > 1 */
         ret |= CPUID_HT;
+        /* KVM never reports CPUID_TM but add it if "tm" prop is set */
+        ret |= CPUID_TM;
     } else if (function == 1 && reg == R_ECX) {
         /* We can set the hypervisor flag, even if KVM does not return it on
          * GET_SUPPORTED_CPUID
          */
         ret |= CPUID_EXT_HYPERVISOR;
+        /* KVM never reports CPUID_EXT_TM2 but add it if "tm2" prop is set */
+        ret |= CPUID_EXT_TM2;
         /* tsc-deadline flag is not returned by GET_SUPPORTED_CPUID, but it
          * can be enabled if the kernel has KVM_CAP_TSC_DEADLINE_TIMER,
          * and the irqchip is in the kernel.

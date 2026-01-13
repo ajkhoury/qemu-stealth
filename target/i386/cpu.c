@@ -1060,7 +1060,7 @@ FeatureWordInfo feature_word_info[FEATURE_WORDS] = {
         },
         .cpuid = {.eax = 1, .reg = R_EDX, },
         .tcg_features = TCG_FEATURES,
-        .no_autoenable_flags = CPUID_HT,
+        .no_autoenable_flags = CPUID_HT | CPUID_TM,
     },
     [FEAT_1_ECX] = {
         .type = CPUID_FEATURE_WORD,
@@ -1076,6 +1076,7 @@ FeatureWordInfo feature_word_info[FEATURE_WORDS] = {
         },
         .cpuid = { .eax = 1, .reg = R_ECX, },
         .tcg_features = TCG_EXT_FEATURES,
+        .no_autoenable_flags = CPUID_EXT_TM2,
     },
     /* Feature names that are already defined on feature_name[] but
      * are set on CPUID[8000_0001].EDX on AMD CPUs don't have their
@@ -9483,6 +9484,9 @@ static void x86_cpu_reset_hold(Object *obj, ResetType type)
     if (env->features[FEAT_1_ECX] & CPUID_EXT_MONITOR) {
         env->msr_ia32_misc_enable |= MSR_IA32_MISC_ENABLE_MWAIT;
     }
+    if (env->features[FEAT_1_EDX] & CPUID_TM) {
+        env->msr_ia32_misc_enable |= MSR_IA32_MISC_ENABLE_TM1;
+    }
 
     memset(env->dr, 0, sizeof(env->dr));
     env->dr[6] = DR6_FIXED_1;
@@ -9755,6 +9759,15 @@ void x86_cpu_expand_features(X86CPU *cpu, Error **errp)
                                           version, errp)) {
                 return;
             }
+        }
+    }
+
+    if (env->features[FEAT_1_EDX] & CPUID_ACPI) {
+        if (object_property_get_bool(OBJECT(cpu), "tm", errp)) {
+            env->features[FEAT_1_EDX] |= CPUID_TM;
+        }
+        if (object_property_get_bool(OBJECT(cpu), "tm2", errp)) {
+            env->features[FEAT_1_ECX] |= CPUID_EXT_TM2;
         }
     }
 
